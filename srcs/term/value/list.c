@@ -112,26 +112,12 @@ list_t *list_repeat(const list_t *op1, const int_t *op2)
 
 bool_t *list_equal(const list_t *op1, const list_t *op2)
 {
-    if (op1->elems_n != op2->elems_n)
-        return bool_set(0);
-
-    size_t i;
-    for (i = 0; i < op1->elems_n; i++)
-        if (!cmp_op(ELM(op1)[i], ELM(op2)[i]))
-            return bool_set(0);
-    return bool_set(1);
+    return bool_set(list_cmp(op1, op2));
 }
 
 bool_t *list_nequal(const list_t *op1, const list_t *op2)
 {
-    if (op1->elems_n != op2->elems_n)
-        return bool_set(1);
-
-    size_t i;
-    for (i = 0; i < op1->elems_n; i++)
-        if (!cmp_op(ELM(op1)[i], ELM(op2)[i]))
-            return bool_set(1);
-    return bool_set(0);
+    return bool_set(!list_cmp(op1, op2));
 }
 
 val_t list_idx(const list_t *op1, const int_t *op2)

@@ -199,6 +199,19 @@ ores_t b_add(val_t op1, val_t op2, struct __ctx *ctx)
         return res;
     }
 
+    if (val_type(op1, SET_V))
+    {
+        set_t *op1s = (set_t*)VAL(op1);
+
+        set_t *val = set_append(op1s, op2);
+        val_t value = set_val(SET_V, val, ctx, POSS(op1), POSE(op2));
+        op_succ(&res, value);
+
+        set_free(op1s);
+        free_val(op2);
+        return res;
+    }
+
     free_val(op1);
     free_val(op2);
     goto ill_op;
@@ -421,6 +434,19 @@ ores_t b_sub(val_t op1, val_t op2, struct __ctx *ctx)
         list_free(op1l);
         free_val(op2);
         goto ill_op;
+    }
+
+    if (val_type(op1, DICT_V))
+    {
+        dict_t *op1d = (dict_t*)VAL(op1);
+
+        dict_t *val = dict_rem(op1d, op2);
+        val_t value = set_val(DICT_V, val, ctx, POSS(op1), POSE(op2));
+        op_succ(&res, value);
+
+        dict_free(op1d);
+        free_val(op2);
+        return res;
     }
 
     free_val(op1);
@@ -1690,6 +1716,50 @@ ores_t b_equal(val_t op1, val_t op2, struct __ctx *ctx)
         goto fl_res;
     }
 
+    if (val_type(op1, DICT_V))
+    {
+        dict_t *op1d = (dict_t*)VAL(op1);
+
+        if (val_type(op2, DICT_V))
+        {
+            dict_t *op2d = (dict_t*)VAL(op2);
+
+            bool_t *val = dict_equal(op1d, op2d);
+            val_t value = set_val(BOOL_V, val, ctx, POSS(op1), POSE(op2));
+            op_succ(&res, value);
+
+            dict_free(op1d);
+            dict_free(op2d);
+            return res;
+        }
+
+        dict_free(op1d);
+        free_val(op2);
+        goto fl_res;
+    }
+
+    if (val_type(op1, SET_V))
+    {
+        set_t *op1s = (set_t*)VAL(op1);
+
+        if (val_type(op2, SET_V))
+        {
+            set_t *op2s = (set_t*)VAL(op2);
+
+            bool_t *val = set_equal(op1s, op2s);
+            val_t value = set_val(BOOL_V, val, ctx, POSS(op1), POSE(op2));
+            op_succ(&res, value);
+
+            set_free(op1s);
+            set_free(op2s);
+            return res;
+        }
+
+        set_free(op1s);
+        free_val(op2);
+        goto fl_res;
+    }
+
     free_val(op1);
     free_val(op2);
     goto fl_res;
@@ -1940,6 +2010,50 @@ ores_t b_nequal(val_t op1, val_t op2, struct __ctx *ctx)
         }
 
         tuple_free(op1t);
+        free_val(op2);
+        goto tr_res;
+    }
+
+    if (val_type(op1, DICT_V))
+    {
+        dict_t *op1d = (dict_t*)VAL(op1);
+
+        if (val_type(op2, DICT_V))
+        {
+            dict_t *op2d = (dict_t*)VAL(op2);
+
+            bool_t *val = dict_nequal(op1d, op2d);
+            val_t value = set_val(BOOL_V, val, ctx, POSS(op1), POSE(op2));
+            op_succ(&res, value);
+
+            dict_free(op1d);
+            dict_free(op2d);
+            return res;
+        }
+
+        dict_free(op1d);
+        free_val(op2);
+        goto tr_res;
+    }
+
+    if (val_type(op1, SET_V))
+    {
+        set_t *op1s = (set_t*)VAL(op1);
+
+        if (val_type(op2, SET_V))
+        {
+            set_t *op2s = (set_t*)VAL(op2);
+
+            bool_t *val = set_nequal(op1s, op2s);
+            val_t value = set_val(BOOL_V, val, ctx, POSS(op1), POSE(op2));
+            op_succ(&res, value);
+
+            set_free(op1s);
+            set_free(op2s);
+            return res;
+        }
+
+        set_free(op1s);
         free_val(op2);
         goto tr_res;
     }
@@ -2373,6 +2487,40 @@ ores_t b_are(val_t op1, val_t op2, struct __ctx *ctx)
         goto tr_res;
     }
 
+    if (val_type(op1, DICT_V))
+    {
+        dict_t *op1d = (dict_t*)VAL(op1);
+
+        for (int i = 0; i < op1d->kvals_n; i++)
+            if (TYP(KEY(KVAL(op1d)[i])) != TYP(op2))
+            {
+                dict_free(op1d);
+                free_val(op2);
+                goto fl_res;
+            }
+
+        dict_free(op1d);
+        free_val(op2);
+        goto tr_res;
+    }
+
+    if (val_type(op1, SET_V))
+    {
+        set_t *op1s = (set_t*)VAL(op1);
+
+        for (int i = 0; i < op1s->elems_n; i++)
+            if (TYP(ELM(op1s)[i]) != TYP(op2))
+            {
+                set_free(op1s);
+                free_val(op2);
+                goto fl_res;
+            }
+
+        set_free(op1s);
+        free_val(op2);
+        goto tr_res;
+    }
+
     free_val(op1);
     free_val(op2);
     goto ill_op;
@@ -2620,6 +2768,18 @@ ores_t u_idx(val_t op, val_t idxs, pos_t pose, struct __ctx *ctx)
         goto inv_type;
     }
 
+    if (val_type(op, DICT_V))
+    {
+        dict_t *opd = (dict_t*)VAL(op);
+
+        val_t value = dict_idx(opd, idxs);
+        op_succ(&res, value);
+
+        dict_free(opd);
+        free_val(idxs);
+        return res;
+    }
+
     free_val(op);
     free_val(idxs);
     goto sub_scr;
@@ -2861,6 +3021,32 @@ int cmp_op(val_t op1, val_t op2)
         {
             tuple_t *op2t = (tuple_t*)VAL(op1);
             return tuple_cmp(op1t, op2t);
+        }
+
+        return 0;
+    }
+
+    if (val_type(op1, DICT_V))
+    {
+        dict_t *op1d = (dict_t*)VAL(op1);
+
+        if (val_type(op2, DICT_V))
+        {
+            dict_t *op2d = (dict_t*)VAL(op1);
+            return dict_cmp(op1d, op2d);
+        }
+
+        return 0;
+    }
+
+    if (val_type(op1, SET_V))
+    {
+        set_t *op1d = (set_t*)VAL(op1);
+
+        if (val_type(op2, SET_V))
+        {
+            set_t *op2d = (set_t*)VAL(op1);
+            return set_cmp(op1d, op2d);
         }
 
         return 0;

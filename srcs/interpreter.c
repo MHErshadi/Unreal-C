@@ -14,6 +14,8 @@ vres_t visit_none(pos_t poss, pos_t pose, struct __ctx *ctx);
 vres_t visit_str(str_nd *node, pos_t poss, pos_t pose, struct __ctx *ctx);
 vres_t visit_list(list_nd *node, pos_t poss, pos_t pose, struct __ctx *ctx);
 vres_t visit_tuple(tuple_nd *node, pos_t poss, pos_t pose, struct __ctx *ctx);
+vres_t visit_dict(dict_nd *node, pos_t poss, pos_t pose, struct __ctx *ctx);
+vres_t visit_set(set_nd *node, pos_t poss, pos_t pose, struct __ctx *ctx);
 vres_t visit_bin_op(bin_op_nd *node, pos_t poss, pos_t pose, struct __ctx *ctx);
 vres_t visit_unary_op(unary_op_nd *node, pos_t poss, pos_t pose, struct __ctx *ctx);
 vres_t visit_idx(idx_nd *node, pos_t poss, pos_t pose, struct __ctx *ctx);
@@ -42,6 +44,10 @@ vres_t visit(node_t node, struct __ctx *ctx)
         return visit_list((list_nd*)NOD(node), POSS(node), POSE(node), ctx);
     case TUPLE_N:
         return visit_tuple((tuple_nd*)NOD(node), POSS(node), POSE(node), ctx);
+    case DICT_N:
+        return visit_dict((dict_nd*)NOD(node), POSS(node), POSE(node), ctx);
+    case SET_N:
+        return visit_set((set_nd*)NOD(node), POSS(node), POSE(node), ctx);
     case BIN_OP_N:
         return visit_bin_op((bin_op_nd*)NOD(node), POSS(node), POSE(node), ctx);
     case UNARY_OP_N:
@@ -214,6 +220,94 @@ vres_t visit_tuple(tuple_nd *node, pos_t poss, pos_t pose, struct __ctx *ctx)
 
     list_t *val = list_set(node->elems_n, elems);
     val_t value = set_val(TUPLE_V, val, ctx, poss, pose);
+
+    visit_succ(&res, value);
+
+    ret:
+    free_nodes(node->elems_nd, node->elems_n);
+    fre(node);
+    return res;
+}
+
+vres_t visit_dict(dict_nd *node, pos_t poss, pos_t pose, struct __ctx *ctx)
+{
+    vres_t res;
+    HERR(res) = 0;
+
+    kval_t *kvals;
+    alloc(kvals, kval_t, node->kvs_n);
+
+    size_t i, kvals_s = 0;
+    for (i = 0; i < node->kvs_n; i++)
+    {
+        val_t key = reg_visit_res(&res, visit(node->kvs_nd[i].key_nd, ctx));
+        if (HERR(res))
+        {
+            free_kvals(kvals, kvals_s);
+            goto ret;
+        }
+
+        if (kvals_has(kvals, kvals_s, key))
+        {
+            free_val(key);
+            continue;
+        }
+
+        val_t val = reg_visit_res(&res, visit(node->kvs_nd[i].val_nd, ctx));
+        if (HERR(res))
+        {
+            free_val(key);
+            free_kvals(kvals, kvals_s);
+            goto ret;
+        }
+
+        kvals[kvals_s++] = set_kval(key, val);
+    }
+
+    ralloc(kvals, kval_t, kvals_s);
+
+    dict_t *val = dict_set(kvals_s, kvals);
+    val_t value = set_val(DICT_V, val, ctx, poss, pose);
+
+    visit_succ(&res, value);
+
+    ret:
+    free_kvs(node->kvs_nd, node->kvs_n);
+    fre(node);
+    return res;
+}
+
+vres_t visit_set(set_nd *node, pos_t poss, pos_t pose, struct __ctx *ctx)
+{
+    vres_t res;
+    HERR(res) = 0;
+
+    val_t *elems;
+    alloc(elems, val_t, node->elems_n);
+
+    size_t i, elems_s = 0;
+    for (i = 0; i < node->elems_n; i++)
+    {
+        val_t elem = reg_visit_res(&res, visit(node->elems_nd[i], ctx));
+        if (HERR(res))
+        {
+            free_vals(elems, elems_s);
+            goto ret;
+        }
+
+        if (vals_has(elems, elems_s, elem))
+        {
+            free_val(elem);
+            continue;
+        }
+
+        elems[elems_s++] = elem;
+    }
+
+    ralloc(elems, val_t, elems_s);
+
+    set_t *val = set_set(elems_s, elems);
+    val_t value = set_val(SET_V, val, ctx, poss, pose);
 
     visit_succ(&res, value);
 

@@ -12,6 +12,7 @@
 
 #define NOD(x) ((x).node)
 #define VAL(x) ((x).val)
+#define KEY(x) ((x).key)
 
 #define CTX(x) ((x).ctx)
 #define POSS(x) ((x).poss)

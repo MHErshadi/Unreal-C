@@ -15,7 +15,9 @@ enum val_t
     NONE_V,
     STR_V,
     LIST_V,
-    TUPLE_V
+    TUPLE_V,
+    DICT_V,
+    SET_V
 };
 
 typedef struct
