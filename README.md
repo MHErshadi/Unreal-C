@@ -16,6 +16,6 @@ Features in this version:\
 10- foreach statement\
 11- while statement\
 12- do while statement\
-13- loop statement\
+13- loop statement
 
 Start from srcs/main.c
