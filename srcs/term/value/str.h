@@ -22,8 +22,12 @@ str_t *str_concat(const str_t *op1, const str_t *op2);
 str_t *str_rem(const str_t *op1, const int_t *op2);
 str_t *str_repeat(const str_t *op1, const int_t *op2);
 
+str_t *str_reverse(const str_t *op);
+
 bool_t *str_equal(const str_t *op1, const str_t *op2);
 bool_t *str_nequal(const str_t *op1, const str_t *op2);
+
+bool_t *str_has(const str_t *op1, const str_t *op2);
 
 str_t *str_idx(const str_t *op1, const int_t *op2);
 

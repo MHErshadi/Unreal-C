@@ -75,6 +75,9 @@ int gpar_sym(symtable_t table, var_t *var, const char *name);
 int svar_sym(symtable_t *table, const char *name, val_t val, int iscnt, int isstc);
 int spar_sym(symtable_t *table, const char *name, val_t val, int iscnt, int isstc);
 
+int dvar_sym(symtable_t *table, const char *name);
+int dpar_sym(symtable_t *table, const char *name);
+
 var_t set_var(const char *name, val_t val, int iscnt, int isstc);
 void free_var(var_t var);
 

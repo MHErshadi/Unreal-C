@@ -17,10 +17,12 @@ set_t *set_cpy(const set_t *val);
 void set_disp(const set_t *val);
 void set_free(set_t *val);
 
-set_t *set_append(const set_t *op1, const val_t op2);
+set_t *set_append(const set_t *op1, val_t op2);
 
 bool_t *set_equal(const set_t *op1, const set_t *op2);
 bool_t *set_nequal(const set_t *op1, const set_t *op2);
+
+bool_t *set_has(const set_t *op1, val_t op2);
 
 int set_cmp(const set_t *op1, const set_t *op2);
 

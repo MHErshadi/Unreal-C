@@ -20,6 +20,8 @@ void tuple_free(tuple_t *val);
 bool_t *tuple_equal(const tuple_t *op1, const tuple_t *op2);
 bool_t *tuple_nequal(const tuple_t *op1, const tuple_t *op2);
 
+bool_t *tuple_has(const tuple_t *op1, val_t op2);
+
 val_t tuple_idx(const tuple_t *op1, const int_t *op2);
 
 int tuple_cmp(const tuple_t *op1, const tuple_t *op2);

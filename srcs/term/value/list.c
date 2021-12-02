@@ -55,7 +55,7 @@ void list_free(list_t *val)
     fre(val);
 }
 
-list_t *list_append(const list_t *op1, const val_t op2)
+list_t *list_append(const list_t *op1, val_t op2)
 {
     size_t prod_s = op1->elems_n + 1;
 
@@ -118,6 +118,16 @@ bool_t *list_equal(const list_t *op1, const list_t *op2)
 bool_t *list_nequal(const list_t *op1, const list_t *op2)
 {
     return bool_set(!list_cmp(op1, op2));
+}
+
+bool_t *list_has(const list_t *op1, val_t op2)
+{
+    size_t i;
+    for (i = 0; i < op1->elems_n; i++)
+        if (cmp_op(ELM(op1)[i], op2))
+            return bool_set(1);
+
+    return bool_set(0);
 }
 
 val_t list_idx(const list_t *op1, const int_t *op2)

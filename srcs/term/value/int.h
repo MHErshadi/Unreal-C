@@ -27,11 +27,15 @@ int_t *int_add(const int_t *op1, const int_t *op2);
 float_t *int_add_float(const int_t *op1, const float_t *op2);
 cmpx_t *int_add_cmpx(const int_t *op1, const cmpx_t *op2);
 int_t *int_add_ui(const int_t *op1, unsigned long op2);
+void int_addself(int_t *op1, const int_t *op2);
+void int_addself_ui(int_t *op1, unsigned long op2);
 
 int_t *int_sub(const int_t *op1, const int_t *op2);
 float_t *int_sub_float(const int_t *op1, const float_t *op2);
 cmpx_t *int_sub_cmpx(const int_t *op1, const cmpx_t *op2);
 int_t *int_sub_ui(const int_t *op1, unsigned long op2);
+void int_subself(int_t *op1, const int_t *op2);
+void int_subself_ui(int_t *op1, unsigned long op2);
 
 int_t *int_mul(const int_t *op1, const int_t *op2);
 float_t *int_mul_float(const int_t *op1, const float_t *op2);

@@ -8,13 +8,14 @@ node_t reg_parse_res(pres_t *res, pres_t other);
 
 pres_t tuple(void);
 pres_t assign(void);
+pres_t type(void);
+pres_t in(void);
 pres_t ior(void);
 pres_t xor(void);
 pres_t and(void);
 pres_t bior(void);
 pres_t bxor(void);
 pres_t band(void);
-pres_t type(void);
 pres_t cmp1(void);
 pres_t cmp2(void);
 pres_t shift(void);
@@ -32,6 +33,11 @@ pres_t dict_expr(tok_t tok);
 pres_t set_expr(tok_t tok, node_t fst_nd);
 pres_t if_expr(pos_t poss);
 pres_t switch_expr(pos_t poss);
+pres_t for_expr(pos_t poss);
+pres_t foreach_expr(pos_t poss, tok_t name_tok);
+pres_t while_expr(pos_t poss);
+pres_t dowhile_expr(pos_t poss);
+pres_t loop_expr(pos_t poss);
 int *var_props(void);
 
 tok_t *toks_ext;
@@ -231,7 +237,19 @@ pres_t assign(void)
         toks_ext--;
     }
 
-    return ior();
+    return type();
+}
+
+pres_t type(void)
+{
+    const char *ops_id[2] = {"is", "are"};
+    return bin_opi(in, NULL, 0, ops_id, 2, in);
+}
+
+pres_t in(void)
+{
+    const char *ops_id[1] = {"in"};
+    return bin_opi(ior, NULL, 0, ops_id, 1, ior);
 }
 
 pres_t ior(void)
@@ -270,13 +288,7 @@ pres_t bxor(void)
 pres_t band(void)
 {
     const enum tok_t ops[1] = {BAND_T};
-    return bin_op(type, ops, 1, type);
-}
-
-pres_t type(void)
-{
-    const char *ops_id[2] = {"is", "are"};
-    return bin_opi(cmp1, NULL, 0, ops_id, 2, cmp1);
+    return bin_op(cmp1, ops, 1, cmp1);
 }
 
 pres_t cmp1(void)
@@ -475,6 +487,30 @@ pres_t core(void)
     {
         fre(VAL(tok));
         return switch_expr(POSS(tok));
+    }
+
+    if (tok_val(tok, "for"))
+    {
+        fre(VAL(tok));
+        return for_expr(POSS(tok));
+    }
+
+    if (tok_val(tok, "while"))
+    {
+        fre(VAL(tok));
+        return while_expr(POSS(tok));
+    }
+
+    if (tok_val(tok, "do"))
+    {
+        fre(VAL(tok));
+        return dowhile_expr(POSS(tok));
+    }
+
+    if (tok_val(tok, "loop"))
+    {
+        fre(VAL(tok));
+        return loop_expr(POSS(tok));
     }
 
     if (tok_type(tok, LPAREN_T))
@@ -985,6 +1021,285 @@ pres_t switch_expr(pos_t poss)
     ralloc(cases, struct __case, case_n);
     switch_nd *nd = set_switch_nd(check, case_n, cases, dbody);
     node_t node = set_node(SWITCH_N, nd, poss, POSE(*toks_ext++));
+
+    parse_succ(&res, node);
+    return res;
+}
+
+pres_t for_expr(pos_t poss)
+{
+    pres_t res;
+    HERR(res) = 0;
+
+    if (!tok_type(*toks_ext, IDNT_T))
+    {
+        inv_syn_err_t error = set_inv_syn_err("Expected identifier", POSS(*toks_ext), POSE(*toks_ext));
+        parse_fail(&res, error);
+        return res;
+    }
+    tok_t name = *toks_ext++;
+
+    if (!tok_type(*toks_ext, EQ_T))
+    {
+        if (tok_val(*toks_ext, "in"))
+        {
+            fre(VAL(*toks_ext++));
+            return foreach_expr(poss, name);
+        }
+
+        fre(VAL(name));
+
+        inv_syn_err_t error = set_inv_syn_err("Expected '=' or 'in'", POSS(*toks_ext), POSE(*toks_ext));
+        parse_fail(&res, error);
+        return res;
+    }
+    toks_ext++;
+
+    node_t start = reg_parse_res(&res, tuple());
+    if (HERR(res))
+    {
+        fre(VAL(name));
+        return res;
+    }
+
+    if (!tok_val(*toks_ext, "to"))
+    {
+        fre(VAL(name));
+        free_node(start);
+
+        inv_syn_err_t error = set_inv_syn_err("Expected 'to'", POSS(*toks_ext), POSE(*toks_ext));
+        parse_fail(&res, error);
+        return res;
+    }
+    fre(VAL(*toks_ext++));
+
+    node_t end = reg_parse_res(&res, tuple());
+    if (HERR(res))
+    {
+        fre(VAL(name));
+        free_node(start);
+        return res;
+    }
+
+    node_t step;
+    if (tok_val(*toks_ext, "step"))
+    {
+        fre(VAL(*toks_ext++));
+
+        step = reg_parse_res(&res, tuple());
+        if (HERR(res))
+        {
+            fre(VAL(name));
+            free_node(start);
+            free_node(end);
+            return res;
+        }
+    }
+    else
+        step = set_node(0, NULL, NULL_POS, NULL_POS);
+
+    if (!tok_type(*toks_ext, COL_T))
+    {
+        fre(VAL(name));
+        free_node(start);
+        free_node(end);
+        free_node(step);
+
+        inv_syn_err_t error = set_inv_syn_err("Expected ':'", POSS(*toks_ext), POSE(*toks_ext));
+        parse_fail(&res, error);
+        return res;
+    }
+    toks_ext++;
+
+    node_t body = reg_parse_res(&res, tuple());
+    if (HERR(res))
+    {
+        fre(VAL(name));
+        free_node(start);
+        free_node(end);
+        free_node(step);
+        return res;
+    }
+
+    for_nd *nd = set_for_nd(name, start, end, step, body);
+    node_t node = set_node(FOR_N, nd, poss, POSE(body));
+
+    parse_succ(&res, node);
+    return res;
+}
+
+pres_t foreach_expr(pos_t poss, tok_t name_tok)
+{
+    pres_t res;
+    HERR(res) = 0;
+
+    node_t iter = reg_parse_res(&res, tuple());
+    if (HERR(res))
+    {
+        fre(VAL(name_tok));
+        return res;
+    }
+
+    if (!tok_type(*toks_ext, COL_T))
+    {
+        fre(VAL(name_tok));
+        free_node(iter);
+
+        inv_syn_err_t error = set_inv_syn_err("Expected ':'", POSS(*toks_ext), POSE(*toks_ext));
+        parse_fail(&res, error);
+        return res;
+    }
+    toks_ext++;
+
+    node_t body = reg_parse_res(&res, tuple());
+    if (HERR(res))
+    {
+        fre(VAL(name_tok));
+        free_node(iter);
+        return res;
+    }
+
+    foreach_nd *nd = set_foreach_nd(name_tok, iter, body);
+    node_t node = set_node(FOREACH_N, nd, poss, POSE(body));
+
+    parse_succ(&res, node);
+    return res;
+}
+
+pres_t while_expr(pos_t poss)
+{
+    pres_t res;
+    HERR(res) = 0;
+
+    node_t cond = reg_parse_res(&res, tuple());
+    if (HERR(res))
+        return res;
+
+    if (!tok_type(*toks_ext, COL_T))
+    {
+        free_node(cond);
+
+        inv_syn_err_t error = set_inv_syn_err("Expected ':'", POSS(*toks_ext), POSE(*toks_ext));
+        parse_fail(&res, error);
+        return res;
+    }
+    toks_ext++;
+
+    node_t body = reg_parse_res(&res, tuple());
+    if (HERR(res))
+    {
+        free_node(cond);
+        return res;
+    }
+
+    while_nd *nd = set_while_nd(cond, body);
+    node_t node = set_node(WHILE_N, nd, poss, POSE(body));
+
+    parse_succ(&res, node);
+    return res;
+}
+
+pres_t dowhile_expr(pos_t poss)
+{
+    pres_t res;
+    HERR(res) = 0;
+
+    node_t body = reg_parse_res(&res, tuple());
+    if (HERR(res))
+        return res;
+
+    if (!tok_val(*toks_ext, "while"))
+    {
+        free_node(body);
+
+        inv_syn_err_t error = set_inv_syn_err("Expected 'while'", POSS(*toks_ext), POSE(*toks_ext));
+        parse_fail(&res, error);
+        return res;
+    }
+    fre(VAL(*toks_ext++));
+
+    node_t cond = reg_parse_res(&res, tuple());
+    if (HERR(res))
+    {
+        free_node(body);
+        return res;
+    }
+
+    dowhile_nd *nd = set_dowhile_nd(cond, body);
+    node_t node = set_node(DOWHILE_N, nd, poss, POSE(body));
+
+    parse_succ(&res, node);
+    return res;
+}
+
+pres_t loop_expr(pos_t poss)
+{
+    pres_t res;
+    HERR(res) = 0;
+
+    node_t init = reg_parse_res(&res, tuple());
+    if (HERR(res))
+        return res;
+
+    if (!tok_type(*toks_ext, NEWLN_T))
+    {
+        free_node(init);
+
+        inv_syn_err_t error = set_inv_syn_err("Expected ';'", POSS(*toks_ext), POSE(*toks_ext));
+        parse_fail(&res, error);
+        return res;
+    }
+    toks_ext++;
+
+    node_t cond = reg_parse_res(&res, tuple());
+    if (HERR(res))
+    {
+        free_node(init);
+        return res;
+    }
+
+    if (!tok_type(*toks_ext, NEWLN_T))
+    {
+        free_node(init);
+        free_node(cond);
+
+        inv_syn_err_t error = set_inv_syn_err("Expected ';'", POSS(*toks_ext), POSE(*toks_ext));
+        parse_fail(&res, error);
+        return res;
+    }
+    toks_ext++;
+
+    node_t step = reg_parse_res(&res, tuple());
+    if (HERR(res))
+    {
+        free_node(init);
+        free_node(cond);
+        return res;
+    }
+
+    if (!tok_type(*toks_ext, COL_T))
+    {
+        free_node(init);
+        free_node(cond);
+        free_node(step);
+
+        inv_syn_err_t error = set_inv_syn_err("Expected ':'", POSS(*toks_ext), POSE(*toks_ext));
+        parse_fail(&res, error);
+        return res;
+    }
+    toks_ext++;
+
+    node_t body = reg_parse_res(&res, tuple());
+    if (HERR(res))
+    {
+        free_node(init);
+        free_node(cond);
+        free_node(step);
+        return res;
+    }
+
+    loop_nd *nd = set_loop_nd(init, cond, step, body);
+    node_t node = set_node(LOOP_N, nd, poss, POSE(body));
 
     parse_succ(&res, node);
     return res;

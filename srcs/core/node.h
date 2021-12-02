@@ -28,7 +28,12 @@ enum node_t
     VAR_ASSIGN_N,
     VAR_ACCESS_N,
     IF_N,
-    SWITCH_N
+    SWITCH_N,
+    FOR_N,
+    FOREACH_N,
+    WHILE_N,
+    DOWHILE_N,
+    LOOP_N
 };
 
 typedef struct
@@ -152,6 +157,46 @@ typedef struct
     node_t dbody_nd;
 } switch_nd;
 
+typedef struct
+{
+    tok_t name_tok;
+
+    node_t start_nd;
+    node_t end_nd;
+    node_t step_nd;
+
+    node_t body_nd;
+} for_nd;
+
+typedef struct
+{
+    tok_t name_tok;
+    node_t iter_nd;
+
+    node_t body_nd;
+} foreach_nd;
+
+typedef struct
+{
+    node_t cond_nd;
+    node_t body_nd;
+} while_nd;
+
+typedef struct
+{
+    node_t body_nd;
+    node_t cond_nd;
+} dowhile_nd;
+
+typedef struct
+{
+    node_t init_nd;
+    node_t cond_nd;
+    node_t step_nd;
+
+    node_t body_nd;
+} loop_nd;
+
 node_t set_node(enum node_t type, void *nd, pos_t poss, pos_t pose);
 void disp_node(node_t node);
 void free_node(node_t node);
@@ -173,6 +218,11 @@ var_assign_nd *set_var_assign_nd(int *props, tok_t name_tok, tok_t assign_tok, n
 var_access_nd *set_var_access_nd(tok_t name_tok);
 if_nd *set_if_nd(size_t case_n, struct __case *cases, node_t ebody_nd);
 switch_nd *set_switch_nd(node_t check_nd, size_t case_n, struct __case *cases, node_t dbody_nd);
+for_nd *set_for_nd(tok_t name_tok, node_t start_nd, node_t end_nd, node_t step_nd, node_t body_nd);
+foreach_nd *set_foreach_nd(tok_t name_tok, node_t iter_nd, node_t body_nd);
+while_nd *set_while_nd(node_t cond_nd, node_t body_nd);
+dowhile_nd *set_dowhile_nd(node_t body_nd, node_t cond_nd);
+loop_nd *set_loop_nd(node_t init_nd, node_t cond_nd, node_t step_nd, node_t body_nd);
 
 struct __kv set_kv(node_t key, node_t val);
 void free_kvs(struct __kv *kvs, size_t kv_n);

@@ -21,6 +21,8 @@ dict_t *dict_rem(const dict_t *op1, val_t op2);
 bool_t *dict_equal(const dict_t *op1, const dict_t *op2);
 bool_t *dict_nequal(const dict_t *op1, const dict_t *op2);
 
+bool_t *dict_has(const dict_t *op1, val_t op2);
+
 val_t dict_idx(const dict_t *op1, val_t op2);
 
 int dict_cmp(const dict_t *op1, const dict_t *op2);

@@ -103,6 +103,16 @@ int_t *int_add_ui(const int_t *op1, unsigned long op2)
     return int_set(prod);
 }
 
+void int_addself(int_t *op1, const int_t *op2)
+{
+    mpz_add(NUM(op1), NUM(op1), NUM(op2));
+}
+
+void int_addself_ui(int_t *op1, unsigned long op2)
+{
+    mpz_add_ui(NUM(op1), NUM(op1), op2);
+}
+
 int_t *int_sub(const int_t *op1, const int_t *op2)
 {
     mpz_t prod;
@@ -143,6 +153,16 @@ int_t *int_sub_ui(const int_t *op1, unsigned long op2)
     mpz_sub_ui(prod, NUM(op1), op2);
 
     return int_set(prod);
+}
+
+void int_subself(int_t *op1, const int_t *op2)
+{
+    mpz_sub(NUM(op1), NUM(op1), NUM(op2));
+}
+
+void int_subself_ui(int_t *op1, unsigned long op2)
+{
+    mpz_sub_ui(NUM(op1), NUM(op1), op2);
 }
 
 int_t *int_mul(const int_t *op1, const int_t *op2)

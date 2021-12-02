@@ -225,6 +225,46 @@ int spar_sym(symtable_t *table, const char *name, val_t val, int iscnt, int isst
     return 0;
 }
 
+int dvar_sym(symtable_t *table, const char *name)
+{
+    size_t i;
+    for (i = 0; i < table->vars_n; i++)
+    {
+        var_t vari = table->vars[i];
+
+        if (!vari.name)
+            continue;
+        if (!strcmp(vari.name, name))
+        {
+            fre(vari.name);
+            free_val(VAL(vari));
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
+int dpar_sym(symtable_t *table, const char *name)
+{
+    size_t i;
+    for (i = 0; i < table->pars_n; i++)
+    {
+        var_t vari = table->pars[i];
+
+        if (!vari.name)
+            continue;
+        if (!strcmp(vari.name, name))
+        {
+            fre(vari.name);
+            free_val(VAL(vari));
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
 var_t set_var(const char *name, val_t val, int iscnt, int isstc)
 {
     char *name_c;

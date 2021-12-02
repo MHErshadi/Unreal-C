@@ -2535,6 +2535,98 @@ ores_t b_are(val_t op1, val_t op2, struct __ctx *ctx)
     return b_ill_op("are", op1, op2, ctx);
 }
 
+ores_t b_in(val_t op1, val_t op2, struct __ctx *ctx)
+{
+    ores_t res;
+
+    if (val_type(op2, STR_V))
+    {
+        str_t *op2s = (str_t*)VAL(op2);
+
+        if (val_type(op1, STR_V))
+        {
+            str_t *op1s = (str_t*)VAL(op1);
+
+            bool_t *val = str_has(op2s, op1s);
+            val_t value = set_val(BOOL_V, val, ctx, POSS(op1), POSE(op2));
+            op_succ(&res, value);
+
+            str_free(op1s);
+            str_free(op2s);
+            return res;
+        }
+
+        free_val(op1);
+        str_free(op2s);
+        goto ill_op;
+    }
+
+    if (val_type(op2, LIST_V))
+    {
+        list_t *op2l = (list_t*)VAL(op2);
+
+        bool_t *val = list_has(op2l, op1);
+        val_t value = set_val(BOOL_V, val, ctx, POSS(op1), POSE(op2));
+        op_succ(&res, value);
+
+        free_val(op1);
+        list_free(op2l);
+        return res;
+    }
+
+    if (val_type(op2, TUPLE_V))
+    {
+        tuple_t *op2t = (tuple_t*)VAL(op2);
+
+        bool_t *val = tuple_has(op2t, op1);
+        val_t value = set_val(BOOL_V, val, ctx, POSS(op1), POSE(op2));
+        op_succ(&res, value);
+
+        free_val(op1);
+        tuple_free(op2t);
+        return res;
+    }
+
+    if (val_type(op2, DICT_V))
+    {
+        dict_t *op2d = (dict_t*)VAL(op2);
+
+        bool_t *val = dict_has(op2d, op1);
+        val_t value = set_val(BOOL_V, val, ctx, POSS(op1), POSE(op2));
+        op_succ(&res, value);
+
+        free_val(op1);
+        dict_free(op2d);
+        return res;
+    }
+
+    if (val_type(op2, SET_V))
+    {
+        set_t *op2s = (set_t*)VAL(op2);
+
+        bool_t *val = set_has(op2s, op1);
+        val_t value = set_val(BOOL_V, val, ctx, POSS(op1), POSE(op2));
+        op_succ(&res, value);
+
+        free_val(op1);
+        set_free(op2s);
+        return res;
+    }
+
+    free_val(op1);
+    free_val(op2);
+    goto ill_op;
+
+    fl_res:
+    return fl_res(op1, op2, ctx);
+
+    tr_res:
+    return tr_res(op1, op2, ctx);
+
+    ill_op:
+    return b_ill_op("in", op1, op2, ctx);
+}
+
 ores_t u_pos(val_t op, struct __ctx *ctx)
 {
     ores_t res;
@@ -2619,6 +2711,18 @@ ores_t u_neg(val_t op, struct __ctx *ctx)
         op_succ(&res, value);
 
         cmpx_free(opc);
+        return res;
+    }
+
+    if (val_type(op, STR_V))
+    {
+        str_t *ops = (str_t*)VAL(op);
+
+        str_t *val = str_reverse(ops);
+        val_t value = set_val(STR_V, val, ctx, POSS(op), POSE(op));
+        op_succ(&res, value);
+
+        str_free(ops);
         return res;
     }
 

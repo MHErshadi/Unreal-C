@@ -58,6 +58,16 @@ bool_t *tuple_nequal(const tuple_t *op1, const tuple_t *op2)
     return bool_set(!tuple_cmp(op1, op2));
 }
 
+bool_t *tuple_has(const tuple_t *op1, val_t op2)
+{
+    size_t i;
+    for (i = 0; i < op1->elems_n; i++)
+        if (cmp_op(ELM(op1)[i], op2))
+            return bool_set(1);
+
+    return bool_set(0);
+}
+
 val_t tuple_idx(const tuple_t *op1, const int_t *op2)
 {
     long long idx = int_get_sll(op2);

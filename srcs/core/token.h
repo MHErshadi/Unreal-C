@@ -70,10 +70,11 @@ enum tok_t
     COL_T,
     COMMA_T,
 
+    NEWLN_T,
     EOF_T
 };
 
-#define KWD_NUM 22
+#define KWD_NUM 29
 static const char *kwds[KWD_NUM] =
 {
     "var",
@@ -85,8 +86,12 @@ static const char *kwds[KWD_NUM] =
     "and", "or", "xor",
     "not",
     "is", "are",
+    "in",
     "if", "elif", "else",
-    "switch", "case", "default"
+    "switch", "case", "default",
+    "for", "to", "step",
+    "while", "do",
+    "loop"
 };
 
 typedef struct

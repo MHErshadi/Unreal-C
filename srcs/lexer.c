@@ -134,6 +134,11 @@ lres_t gen_toks(const char *code, const char *fn, char term)
             toks[toks_s++] = set_tok(COMMA_T, NULL, curr_pos, NULL_POS);
             adv_pos(&curr_pos, *code_ext++);
             break;
+        case '\n':
+        case ';':
+            toks[toks_s++] = set_tok(NEWLN_T, NULL, curr_pos, NULL_POS);
+            adv_pos(&curr_pos, *code_ext++);
+            break;
         default:
             free_toks(toks, toks_s);
 

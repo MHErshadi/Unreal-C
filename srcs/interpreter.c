@@ -23,6 +23,11 @@ vres_t visit_var_assign(var_assign_nd *node, pos_t poss, pos_t pose, struct __ct
 vres_t visit_var_access(var_access_nd *node, pos_t poss, pos_t pose, struct __ctx *ctx);
 vres_t visit_if(if_nd *node, pos_t poss, pos_t pose, struct __ctx *ctx);
 vres_t visit_switch(switch_nd *node, pos_t poss, pos_t pose, struct __ctx *ctx);
+vres_t visit_for(for_nd *node, pos_t poss, pos_t pose, struct __ctx *ctx);
+vres_t visit_foreach(foreach_nd *node, pos_t poss, pos_t pose, struct __ctx *ctx);
+vres_t visit_while(while_nd *node, pos_t poss, pos_t pose, struct __ctx *ctx);
+vres_t visit_dowhile(dowhile_nd *node, pos_t poss, pos_t pose, struct __ctx *ctx);
+vres_t visit_loop(loop_nd *node, pos_t poss, pos_t pose, struct __ctx *ctx);
 
 vres_t visit(node_t node, struct __ctx *ctx)
 {
@@ -62,6 +67,16 @@ vres_t visit(node_t node, struct __ctx *ctx)
         return visit_if((if_nd*)NOD(node), POSS(node), POSE(node), ctx);
     case SWITCH_N:
         return visit_switch((switch_nd*)NOD(node), POSS(node), POSE(node), ctx);
+    case FOR_N:
+        return visit_for((for_nd*)NOD(node), POSS(node), POSE(node), ctx);
+    case FOREACH_N:
+        return visit_foreach((foreach_nd*)NOD(node), POSS(node), POSE(node), ctx);
+    case WHILE_N:
+        return visit_while((while_nd*)NOD(node), POSS(node), POSE(node), ctx);
+    case DOWHILE_N:
+        return visit_dowhile((dowhile_nd*)NOD(node), POSS(node), POSE(node), ctx);
+    case LOOP_N:
+        return visit_loop((loop_nd*)NOD(node), POSS(node), POSE(node), ctx);
     default:
         un_crash("visit function: invalid node type `%d`\n", TYP(node));
         break;
@@ -351,6 +366,8 @@ vres_t visit_bin_op(bin_op_nd *node, pos_t poss, pos_t pose, struct __ctx *ctx)
             prod = b_is(op1, op2, ctx);
         else if (tok_val(node->op_tok, "are"))
             prod = b_are(op1, op2, ctx);
+        else if (tok_val(node->op_tok, "in"))
+            prod = b_in(op1, op2, ctx);
         else
             un_crash("visit_bin_op function: invalid operator value \"%s\"", VAL(node->op_tok));
         fre(VAL(node->op_tok));
@@ -580,6 +597,8 @@ vres_t visit_var_assign(var_assign_nd *node, pos_t poss, pos_t pose, struct __ct
     err = getv_ctx(ctx_c, &ovar, &isp, name);
     if (err)
     {
+        free_node(node->val_nd);
+
         runtime_err_t error = set_runtime_err("'%s' is not defined",
             NOT_DEF_E, ctx, poss, pose, name);
         visit_fail(&res, error);
@@ -587,6 +606,8 @@ vres_t visit_var_assign(var_assign_nd *node, pos_t poss, pos_t pose, struct __ct
     }
     if (ICNT(ovar))
     {
+        free_node(node->val_nd);
+
         runtime_err_t error = set_runtime_err("'%s' is not accessable because it is const",
             CNT_ACC_E, ctx, poss, pose, name);
         visit_fail(&res, error);
@@ -808,9 +829,196 @@ vres_t visit_switch(switch_nd *node, pos_t poss, pos_t pose, struct __ctx *ctx)
 
     ret:
     free_val(check);
-    free_node(node->check_nd);
     free_cases(node->cases, node->case_n);
     free_node(node->dbody_nd);
     fre(node);
     return res;
+}
+
+vres_t visit_for(for_nd *node, pos_t poss, pos_t pose, struct __ctx *ctx)
+{
+    vres_t res;
+    HERR(res) = 0;
+
+    char *name = VAL(node->name_tok);
+
+    val_t start = reg_visit_res(&res, visit(node->start_nd, ctx));
+    if (HERR(res))
+    {
+        free_node(node->end_nd);
+        free_node(node->step_nd);
+        goto ret;
+    }
+
+    if (!val_type(start, INT_V))
+    {
+        free_node(node->end_nd);
+        free_node(node->step_nd);
+        free_val(start);
+
+        runtime_err_t error = set_runtime_err("Start value must be <int>",
+            INV_TYPE_E, ctx, poss, pose);
+        visit_fail(&res, error);
+        goto ret;
+    }
+    int_t *starti = (int_t*)VAL(start);
+
+    val_t end = reg_visit_res(&res, visit(node->end_nd, ctx));
+    if (HERR(res))
+    {
+        int_free(starti);
+        free_node(node->step_nd);
+        goto ret;
+    }
+
+    if (!val_type(end, INT_V))
+    {
+        int_free(starti);
+        free_val(end);
+        free_node(node->step_nd);
+
+        runtime_err_t error = set_runtime_err("End value must be <int>",
+            INV_TYPE_E, ctx, poss, pose);
+        visit_fail(&res, error);
+        goto ret;
+    }
+    int_t *endi = (int_t*)VAL(end);
+
+    if (TYP(node->step_nd))
+    {
+        val_t step = reg_visit_res(&res, visit(node->step_nd, ctx));
+        if (HERR(res))
+        {
+            int_free(starti);
+            int_free(endi);
+            goto ret;
+        }
+
+        if (!val_type(step, INT_V))
+        {
+            int_free(starti);
+            int_free(endi);
+            free_val(step);
+
+            runtime_err_t error = set_runtime_err("Step value must be <int>",
+                INV_TYPE_E, ctx, poss, pose);
+            visit_fail(&res, error);
+            goto ret;
+        }
+        int_t *stepi = (int_t*)VAL(step);
+
+        int err = svar_sym(&TBL(ctx), name, start, 0, 0);
+        if (err)
+        {
+            int_free(starti);
+            int_free(endi);
+            int_free(stepi);
+
+            runtime_err_t error = set_runtime_err("'%s' is not accessable because it is const",
+                CNT_ACC_E, ctx, poss, pose, name);
+            visit_fail(&res, error);
+            goto ret;
+        }
+
+        if (int_sgn(stepi) == 1)
+            while (int_cmp(starti, endi) < 0)
+            {
+                //val_t body = reg_visit_res(&res, visit(node->body_nd, ctx));
+                //if (HERR(res))
+                //{
+                //    int_free(endi);
+                //    int_free(stepi);
+                //    goto ret;
+                //}
+
+                //free_val(body);
+                int_addself(starti, stepi);
+            }
+        else
+            while (int_cmp(starti, endi) > 0)
+            {
+                //val_t body = reg_visit_res(&res, visit(node->body_nd, ctx));
+                //if (HERR(res))
+                //{
+                //    int_free(endi);
+                //    int_free(stepi);
+                //    goto ret;
+                //}
+
+                //free_val(body);
+                int_addself(starti, stepi);
+            }
+
+        int_free(stepi);
+    }
+    else
+    {
+        int err = svar_sym(&TBL(ctx), name, start, 0, 0);
+        if (err)
+        {
+            int_free(starti);
+            int_free(endi);
+
+            runtime_err_t error = set_runtime_err("'%s' is not accessable because it is const",
+                CNT_ACC_E, ctx, poss, pose, name);
+            visit_fail(&res, error);
+            goto ret;
+        }
+
+        if (int_cmp(starti, endi) <= 0)
+            while (int_cmp(starti, endi) < 0)
+            {
+                //val_t body = reg_visit_res(&res, visit(node->body_nd, ctx));
+                //if (HERR(res))
+                //{
+                //    int_free(endi);
+                //    goto ret;
+                //}
+
+                //free_val(body);
+                int_addself_ui(starti, 1);
+            }
+        else
+            while (int_cmp(starti, endi) > 0)
+            {
+                //val_t body = reg_visit_res(&res, visit(node->body_nd, ctx));
+                //if (HERR(res))
+                //{
+                //    int_free(endi);
+                //    goto ret;
+                //}
+
+                //free_val(body);
+                int_subself_ui(starti, 1);
+            }
+    }
+
+    visit_succ(&res, set_val(0, NULL, NULL, NULL_POS, NULL_POS));
+    int_free(endi);
+
+    ret:
+    fre(name);
+    free_node(node->body_nd);
+    fre(node);
+    return res;
+}
+
+vres_t visit_foreach(foreach_nd *node, pos_t poss, pos_t pose, struct __ctx *ctx)
+{
+
+}
+
+vres_t visit_while(while_nd *node, pos_t poss, pos_t pose, struct __ctx *ctx)
+{
+
+}
+
+vres_t visit_dowhile(dowhile_nd *node, pos_t poss, pos_t pose, struct __ctx *ctx)
+{
+
+}
+
+vres_t visit_loop(loop_nd *node, pos_t poss, pos_t pose, struct __ctx *ctx)
+{
+
 }

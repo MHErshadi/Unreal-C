@@ -53,7 +53,7 @@ void set_free(set_t *val)
     fre(val);
 }
 
-set_t *set_append(const set_t *op1, const val_t op2)
+set_t *set_append(const set_t *op1, val_t op2)
 {
     size_t prod_s = op1->elems_n + 1;
 
@@ -84,6 +84,16 @@ bool_t *set_equal(const set_t *op1, const set_t *op2)
 bool_t *set_nequal(const set_t *op1, const set_t *op2)
 {
     return bool_set(!set_cmp(op1, op2));
+}
+
+bool_t *set_has(const set_t *op1, val_t op2)
+{
+    size_t i;
+    for (i = 0; i < op1->elems_n; i++)
+        if (cmp_op(ELM(op1)[i], op2))
+            return bool_set(1);
+
+    return bool_set(0);
 }
 
 val_t set_idx(const set_t *op1, const int_t *op2)

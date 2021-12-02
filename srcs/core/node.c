@@ -202,6 +202,69 @@ void disp_node(node_t node)
         printf(")");
         return;
     }
+    if (node_type(node, FOR_N))
+    {
+        for_nd *nd = (for_nd*)NOD(node);
+
+        printf("(%s, ", VAL(nd->name_tok));
+        disp_node(nd->start_nd);
+        printf(", ");
+        disp_node(nd->end_nd);
+        printf(", ");
+        disp_node(nd->step_nd);
+        printf(", ");
+        disp_node(nd->body_nd);
+        printf(")");
+        return;
+    }
+    if (node_type(node, FOREACH_N))
+    {
+        foreach_nd *nd = (foreach_nd*)NOD(node);
+
+        printf("(%s, ", VAL(nd->name_tok));
+        disp_node(nd->iter_nd);
+        printf(", ");
+        disp_node(nd->body_nd);
+        printf(")");
+        return;
+    }
+    if (node_type(node, WHILE_N))
+    {
+        while_nd *nd = (while_nd*)NOD(node);
+
+        printf("(");
+        disp_node(nd->cond_nd);
+        printf(", ");
+        disp_node(nd->body_nd);
+        printf(")");
+        return;
+    }
+    if (node_type(node, DOWHILE_N))
+    {
+        dowhile_nd *nd = (dowhile_nd*)NOD(node);
+
+        printf("(");
+        disp_node(nd->body_nd);
+        printf(", ");
+        disp_node(nd->cond_nd);
+        printf(")");
+        return;
+    }
+    if (node_type(node, LOOP_N))
+    {
+        loop_nd *nd = (loop_nd*)NOD(node);
+
+        printf("(");
+        disp_node(nd->init_nd);
+        printf(", ");
+        disp_node(nd->cond_nd);
+        printf(", ");
+        disp_node(nd->step_nd);
+        printf(", ");
+        disp_node(nd->body_nd);
+        printf(")");
+        return;
+    }
 
     un_crash("disp_node function: invalid node type `%d`", TYP(node));
 }
@@ -347,6 +410,57 @@ void free_node(node_t node)
         free_node(nd->check_nd);
         free_cases(nd->cases, nd->case_n);
         free_node(nd->dbody_nd);
+        fre(nd);
+        return;
+    }
+    if (node_type(node, FOR_N))
+    {
+        for_nd *nd = (for_nd*)NOD(node);
+
+        fre(VAL(nd->name_tok));
+        free_node(nd->start_nd);
+        free_node(nd->end_nd);
+        free_node(nd->step_nd);
+        free_node(nd->body_nd);
+        fre(nd);
+        return;
+    }
+    if (node_type(node, FOREACH_N))
+    {
+        foreach_nd *nd = (foreach_nd*)NOD(node);
+
+        fre(VAL(nd->name_tok));
+        free_node(nd->iter_nd);
+        free_node(nd->body_nd);
+        fre(nd);
+        return;
+    }
+    if (node_type(node, WHILE_N))
+    {
+        while_nd *nd = (while_nd*)NOD(node);
+
+        free_node(nd->cond_nd);
+        free_node(nd->body_nd);
+        fre(nd);
+        return;
+    }
+    if (node_type(node, DOWHILE_N))
+    {
+        dowhile_nd *nd = (dowhile_nd*)NOD(node);
+
+        free_node(nd->body_nd);
+        free_node(nd->cond_nd);
+        fre(nd);
+        return;
+    }
+    if (node_type(node, LOOP_N))
+    {
+        loop_nd *nd = (loop_nd*)NOD(node);
+
+        free_node(nd->init_nd);
+        free_node(nd->cond_nd);
+        free_node(nd->step_nd);
+        free_node(nd->body_nd);
         fre(nd);
         return;
     }
@@ -536,6 +650,67 @@ switch_nd *set_switch_nd(node_t check_nd, size_t case_n, struct __case *cases, n
     switch_->dbody_nd = dbody_nd;
 
     return switch_;
+}
+
+for_nd *set_for_nd(tok_t name_tok, node_t start_nd, node_t end_nd, node_t step_nd, node_t body_nd)
+{
+    for_nd *for_;
+    alloc(for_, for_nd, 1);
+
+    for_->name_tok = name_tok;
+    for_->start_nd = start_nd;
+    for_->end_nd = end_nd;
+    for_->step_nd = step_nd;
+    for_->body_nd = body_nd;
+
+    return for_;
+}
+
+foreach_nd *set_foreach_nd(tok_t name_tok, node_t iter_nd, node_t body_nd)
+{
+    foreach_nd *foreach;
+    alloc(foreach, foreach_nd, 1);
+
+    foreach->name_tok = name_tok;
+    foreach->iter_nd = iter_nd;
+    foreach->body_nd = body_nd;
+
+    return foreach;
+}
+
+while_nd *set_while_nd(node_t cond_nd, node_t body_nd)
+{
+    while_nd *while_;
+    alloc(while_, while_nd, 1);
+
+    while_->cond_nd = cond_nd;
+    while_->body_nd = body_nd;
+
+    return while_;
+}
+
+dowhile_nd *set_dowhile_nd(node_t body_nd, node_t cond_nd)
+{
+    dowhile_nd *dowhile;
+    alloc(dowhile, dowhile_nd, 1);
+
+    dowhile->body_nd = body_nd;
+    dowhile->cond_nd = cond_nd;
+
+    return dowhile;
+}
+
+loop_nd *set_loop_nd(node_t init_nd, node_t cond_nd, node_t step_nd, node_t body_nd)
+{
+    loop_nd *loop;
+    alloc(loop, loop_nd, 1);
+
+    loop->init_nd = init_nd;
+    loop->cond_nd = cond_nd;
+    loop->step_nd = step_nd;
+    loop->body_nd = body_nd;
+
+    return loop;
 }
 
 struct __kv set_kv(node_t key, node_t val)

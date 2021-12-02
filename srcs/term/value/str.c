@@ -70,6 +70,16 @@ str_t *str_repeat(const str_t *op1, const int_t *op2)
     return str_set(prod);
 }
 
+str_t *str_reverse(const str_t *op)
+{
+    ustr_t prod;
+    ustr_init(prod);
+
+    ustr_reverse(prod, STR(op));
+
+    return str_set(prod);
+}
+
 bool_t *str_equal(const str_t *op1, const str_t *op2)
 {
     int prod = ustr_equal(STR(op1), STR(op2));
@@ -80,6 +90,13 @@ bool_t *str_equal(const str_t *op1, const str_t *op2)
 bool_t *str_nequal(const str_t *op1, const str_t *op2)
 {
     int prod = ustr_nequal(STR(op1), STR(op2));
+
+    return bool_set(prod);
+}
+
+bool_t *str_has(const str_t *op1, const str_t *op2)
+{
+    int prod = ustr_have(STR(op1), STR(op2));
 
     return bool_set(prod);
 }

@@ -40,6 +40,8 @@ ores_t b_xor(val_t op1, val_t op2, struct __ctx *ctx);
 ores_t b_is(val_t op1, val_t op2, struct __ctx *ctx);
 ores_t b_are(val_t op1, val_t op2, struct __ctx *ctx);
 
+ores_t b_in(val_t op1, val_t op2, struct __ctx *ctx);
+
 ores_t u_pos(val_t op, struct __ctx *ctx);
 ores_t u_neg(val_t op, struct __ctx *ctx);
 

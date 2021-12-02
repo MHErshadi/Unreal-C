@@ -92,6 +92,16 @@ bool_t *dict_nequal(const dict_t *op1, const dict_t *op2)
     return bool_set(!dict_cmp(op1, op2));
 }
 
+bool_t *dict_has(const dict_t *op1, val_t op2)
+{
+    size_t i;
+    for (i = 0; i < op1->kvals_n; i++)
+        if (cmp_op(KEY(KVAL(op1)[i]), op2))
+            return bool_set(1);
+
+    return bool_set(0);
+}
+
 val_t dict_idx(const dict_t *op1, val_t op2)
 {
     size_t i;
