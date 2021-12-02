@@ -1,6 +1,8 @@
 # Unreal-C
 Unreal C version 1.0.0
 
+Adapted from https://github.com/davidcallanan/py-myopl-code
+
 Features in this version:\
 01- int, float and complex numbers\
 02- bool and none types\
