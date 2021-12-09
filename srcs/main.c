@@ -55,7 +55,7 @@ int main(int argc, char **argv)
                 continue;
             }
 
-            vres_t vres = visit(NOD(pres), &ctx);
+            vres_t vres = visit(NOD(pres), &ctx, 1);
             if (HERR(vres))
             {
                 disp_runtime_err(ERR(vres));

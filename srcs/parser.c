@@ -389,6 +389,32 @@ pres_t idx()
         idx_nd *nd = set_idx_nd(op, idxs);
         node_t node = set_node(IDX_N, nd, POSS(op), pose);
 
+        while (tok_type(*toks_ext, LSQBRAC_T))
+        {
+            toks_ext++;
+
+            idxs = reg_parse_res(&res, tuple());
+            if (HERR(res))
+            {
+                free_node(node);
+                return res;
+            }
+
+            if (!tok_type(*toks_ext, RSQBRAC_T))
+            {
+                free_node(node);
+                free_node(idxs);
+
+                inv_syn_err_t error = set_inv_syn_err("Expected ']'", POSS(*toks_ext), POSE(*toks_ext));
+                parse_fail(&res, error);
+                return res;
+            }
+            pose = POSE(*toks_ext++);
+
+            nd = set_idx_nd(node, idxs);
+            node = set_node(IDX_N, nd, POSS(node), pose);
+        }
+
         parse_succ(&res, node);
         return res;
     }

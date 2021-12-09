@@ -13,6 +13,6 @@ typedef struct
     runtime_err_t error;
 } vres_t;
 
-vres_t visit(node_t node, struct __ctx *ctx);
+vres_t visit(node_t node, struct __ctx *ctx, int shf);
 
 #endif /* __INTERPRETER__ */
