@@ -9,7 +9,7 @@ Features in this version:\
 03- strings\
 04- lists, tuples, dicts and sets\
 05- binary and unary operators (+, -, *, /, %, ==, != and ...)\
-06- veriables\
+06- variables\
 07- if statement\
 08- switch statement\
 09- for statement\
