@@ -62,7 +62,7 @@ typedef struct
 
 typedef struct
 {
-    tok_t bool_tok;
+    int id : 1;
 } bool_nd;
 
 typedef struct
@@ -205,7 +205,7 @@ void free_nodes(node_t *nodes, size_t nodes_s);
 int_nd *set_int_nd(tok_t num_tok);
 float_nd *set_float_nd(tok_t num_tok);
 cmpx_nd *set_cmpx_nd(tok_t num_tok);
-bool_nd *set_bool_nd(tok_t bool_tok);
+bool_nd *set_bool_nd(int id);
 str_nd *set_str_nd(tok_t str_tok);
 list_nd *set_list_nd(size_t elems_n, node_t *elems_nd);
 tuple_nd *set_tuple_nd(size_t elems_n, node_t *elems_nd);

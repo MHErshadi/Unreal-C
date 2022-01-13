@@ -45,7 +45,7 @@ void disp_node(node_t node)
     {
         bool_nd *nd = (bool_nd*)NOD(node);
 
-        printf("(%s)", VAL(nd->bool_tok));
+        printf("(%d)", nd->id);
         return;
     }
     if (node_type(node, NONE_N))
@@ -302,7 +302,6 @@ void free_node(node_t node)
     {
         bool_nd *nd = (bool_nd*)NOD(node);
 
-        fre(VAL(nd->bool_tok));
         fre(nd);
         return;
     }
@@ -506,12 +505,12 @@ cmpx_nd *set_cmpx_nd(tok_t num_tok)
     return num;
 }
 
-bool_nd *set_bool_nd(tok_t bool_tok)
+bool_nd *set_bool_nd(int id)
 {
     bool_nd *bool;
     alloc(bool, bool_nd, 1);
 
-    bool->bool_tok = bool_tok;
+    bool->id = id;
 
     return bool;
 }

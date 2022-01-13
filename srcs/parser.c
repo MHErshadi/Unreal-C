@@ -457,9 +457,23 @@ pres_t core(void)
         return res;
     }
 
-    if (tok_val(tok, "true") || tok_val(tok, "false"))
+    if (tok_val(tok, "true"))
     {
-        bool_nd *nd = set_bool_nd(tok);
+        fre(VAL(tok));
+
+        bool_nd *nd = set_bool_nd(1);
+        node_t node = set_node(BOOL_N, nd, POSS(tok), POSE(tok));
+
+        pres_t res;
+        parse_succ(&res, node);
+        return res;
+    }
+
+    if (tok_val(tok, "false"))
+    {
+        fre(VAL(tok));
+
+        bool_nd *nd = set_bool_nd(0);
         node_t node = set_node(BOOL_N, nd, POSS(tok), POSE(tok));
 
         pres_t res;

@@ -156,14 +156,11 @@ vres_t visit_cmpx(cmpx_nd *node, pos_t poss, pos_t pose, struct __ctx *ctx, int 
 
 vres_t visit_bool(bool_nd *node, pos_t poss, pos_t pose, struct __ctx *ctx, int shf)
 {
-    bool_t *val = bool_set_str(VAL(node->bool_tok));
+    bool_t *val = bool_set(node->id);
     val_t value = set_val(BOOL_V, val, ctx, poss, pose);
 
     if (shf)
-    {
-        fre(VAL(node->bool_tok));
         fre(node);
-    }
 
     vres_t res;
     visit_succ(&res, value);

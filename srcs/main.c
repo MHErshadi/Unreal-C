@@ -64,7 +64,7 @@ int main(int argc, char **argv)
 
             time_t e = clock();
             disp_val(VAL(vres), '\n');
-            printf("time: %llu\n", e - s);
+            printf("time: %ld\n", e - s);
             free_val(VAL(vres));
         }
 
