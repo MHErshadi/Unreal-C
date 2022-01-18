@@ -10,7 +10,7 @@
 #define STR_A 128
 
 lres_t set_lres(tok_t *toks, int haserr, ill_chr_err_t error);
-void free_toks(tok_t *toks, size_t toks_s);
+void free_toks(tok_t *toks, unsigned long long toks_s);
 
 tok_t gen_idnt(pos_t *curr_pos, char term);
 tok_t gen_num(pos_t *curr_pos, char term);
@@ -31,8 +31,8 @@ lres_t gen_toks(const char *code, const char *fn, char term)
     tok_t *toks;
     alloc(toks, tok_t, TOKS_A);
 
-    size_t m = TOKS_A;
-    size_t toks_s = 0;
+    unsigned long long m = TOKS_A;
+    unsigned long long toks_s = 0;
 
     pos_t curr_pos = set_pos(0, 0, fn);
 
@@ -165,9 +165,9 @@ lres_t set_lres(tok_t *toks, int haserr, ill_chr_err_t error)
     return res;
 }
 
-void free_toks(tok_t *toks, size_t toks_s)
+void free_toks(tok_t *toks, unsigned long long toks_s)
 {
-    size_t i;
+    unsigned long long i;
     for (i = 0; i < toks_s; i++)
         free_tok(toks[i]);
 
@@ -181,8 +181,8 @@ tok_t gen_idnt(pos_t *curr_pos, char term)
 
     pos_t poss = set_pos(IDX(*curr_pos), LN(*curr_pos), FN(*curr_pos));
 
-    size_t m = IDNT_A;
-    size_t i;
+    unsigned long long m = IDNT_A;
+    unsigned long long i;
     for (i = 0; (isalnum(*code_ext) || *code_ext == '_') && *code_ext != term; i++)
     {
         if (i == m)
@@ -209,8 +209,8 @@ tok_t gen_num(pos_t *curr_pos, char term)
 
     pos_t poss = set_pos(IDX(*curr_pos), LN(*curr_pos), FN(*curr_pos));
 
-    size_t m = NUM_A;
-    size_t i;
+    unsigned long long m = NUM_A;
+    unsigned long long i;
     for (i = 0; (isdigit(*code_ext) || *code_ext == '.') && *code_ext != term; i++)
     {
         if (i == m)
@@ -284,8 +284,8 @@ tok_t gen_str(pos_t *curr_pos, char quote, char term)
 
     *code_ext++;
 
-    size_t m = STR_A;
-    size_t i, j = 0;
+    unsigned long long m = STR_A;
+    unsigned long long i, j = 0;
     int esc_char = 0;
     for (i = 0; (*code_ext != quote || esc_char) && *code_ext != term; i++)
     {

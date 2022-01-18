@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <signal.h>
+#include <time.h>
 
 #include "lexer.h"
 #include "parser.h"
@@ -12,6 +14,7 @@
 
 int cmd_handler(int argc, char **argv);
 void disp_err(int err_code);
+void terminate(int sig);
 
 const char *cmderr_str[1] =
 {
@@ -36,6 +39,7 @@ int main(int argc, char **argv)
 
             //disp_err(cmd_handler(1, *command));
 
+            time_t s = clock();
             for (; isspace((char)*command); command++);
             if (!*command)
                 continue;
@@ -61,18 +65,22 @@ int main(int argc, char **argv)
                 disp_runtime_err(ERR(cres));
                 continue;
             }
+            time_t e = clock();
 
             printf("%s\n", cres.incs);
             printf("%s\n", cres.deps);
             printf("%s\n", cres.defs);
+            printf("%s\n", cres.funcs_head);
             printf("%s\n", cres.main);
-            disp_funs(cres.funs);
+            disp_funcs(cres.funcs);
+            printf("\ntime: %ld\n", e - s);
 
             fre(cres.incs);
             fre(cres.deps);
             fre(cres.defs);
             fre(cres.main);
-            free_funs(cres.funs);
+            fre(cres.funcs_head);
+            free_funcs(cres.funcs);
         }
 
         fre(command);
@@ -91,4 +99,10 @@ void disp_err(int err_code)
 {
     if (!err_code)
         return;
+}
+
+void terminate(int sig)
+{
+    puts("\nterminating operation");
+    exit(1);
 }

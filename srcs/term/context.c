@@ -37,7 +37,7 @@ int getv_ctx(struct __ctx *ctx, var_t *var, int *isp, const char *name)
     return err;
 }
 
-symtable_t init_sym(size_t vars_s, size_t pars_s)
+symtable_t init_sym(unsigned long long vars_s, unsigned long long pars_s)
 {
     symtable_t table;
 
@@ -69,7 +69,7 @@ symtable_t set_sym_def(struct __ctx *ctx)
 
 void free_sym(symtable_t *table)
 {
-    size_t i, lstc = 0;
+    unsigned long long i, lstc = 0;
 
     for (i = 0; i < table->vars_n; i++)
     {
@@ -117,7 +117,7 @@ int get_sym(symtable_t table, var_t *var, int *isp, const char *name)
 
 int gvar_sym(symtable_t table, var_t *var, const char *name)
 {
-    size_t i;
+    unsigned long long i;
     for (i = 0; i < table.vars_n; i++)
     {
         var_t vari = VARS(table)[i];
@@ -136,7 +136,7 @@ int gvar_sym(symtable_t table, var_t *var, const char *name)
 
 int gpar_sym(symtable_t table, var_t *var, const char *name)
 {
-    size_t i;
+    unsigned long long i;
     for (i = 0; i < table.pars_n; i++)
     {
         var_t vari = PARS(table)[i];
@@ -155,7 +155,7 @@ int gpar_sym(symtable_t table, var_t *var, const char *name)
 
 int svar_sym(symtable_t *table, const char *name, val_t val, int iscnt, int isstc)
 {
-    size_t i, lstf = table->vars_n;
+    unsigned long long i, lstf = table->vars_n;
     for (i = 0; i < table->vars_n; i++)
     {
         var_t vari = table->vars[i];
@@ -191,7 +191,7 @@ int svar_sym(symtable_t *table, const char *name, val_t val, int iscnt, int isst
 
 int spar_sym(symtable_t *table, const char *name, val_t val, int iscnt, int isstc)
 {
-    size_t i, lstf = table->pars_n;
+    unsigned long long i, lstf = table->pars_n;
     for (i = 0; i < table->pars_n; i++)
     {
         var_t vari = table->pars[i];
@@ -227,7 +227,7 @@ int spar_sym(symtable_t *table, const char *name, val_t val, int iscnt, int isst
 
 int dvar_sym(symtable_t *table, const char *name)
 {
-    size_t i;
+    unsigned long long i;
     for (i = 0; i < table->vars_n; i++)
     {
         var_t vari = table->vars[i];
@@ -247,7 +247,7 @@ int dvar_sym(symtable_t *table, const char *name)
 
 int dpar_sym(symtable_t *table, const char *name)
 {
-    size_t i;
+    unsigned long long i;
     for (i = 0; i < table->pars_n; i++)
     {
         var_t vari = table->pars[i];

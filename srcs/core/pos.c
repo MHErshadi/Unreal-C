@@ -2,7 +2,7 @@
 
 #include "pos.h"
 
-pos_t set_pos(size_t idx, size_t ln, const char *fn)
+pos_t set_pos(unsigned long long idx, unsigned long long ln, const char *fn)
 {
     pos_t pos;
 

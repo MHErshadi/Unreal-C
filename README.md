@@ -19,5 +19,3 @@ Features in this version:\
 13- loop statement
 
 Start from srcs/main.c
-
-Note: Also included compiler version of unreal. But it's not actually complete. For seeing Unreal Compiler, start from srcs/cmd.c

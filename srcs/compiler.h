@@ -6,9 +6,9 @@
 
 typedef struct
 {
-    size_t size;
-    char **str;
-} funs_t;
+    unsigned long long size;
+    char **strs;
+} funcs_t;
 
 typedef struct
 {
@@ -16,7 +16,9 @@ typedef struct
     char *deps;
     char *defs;
     char *main;
-    funs_t funs;
+    char *end_main;
+    char *funcs_head;
+    funcs_t funcs;
 
     int haserr : 1;
     runtime_err_t error;
@@ -24,8 +26,8 @@ typedef struct
 
 cres_t compile(node_t node);
 
-funs_t set_funs(size_t size, char **str);
-void disp_funs(funs_t funs);
-void free_funs(funs_t funs);
+funcs_t set_funcs(unsigned long long size, char **strs);
+void disp_funcs(funcs_t funcs);
+void free_funcs(funcs_t funcs);
 
 #endif /* __COMPILER__ */

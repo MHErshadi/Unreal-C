@@ -65,7 +65,7 @@ void disp_node(node_t node)
         list_nd *nd = (list_nd*)NOD(node);
 
         printf("([");
-        size_t i;
+        unsigned long long i;
         for (i = 0; i < nd->elems_n; i++)
         {
             disp_node(nd->elems_nd[i]);
@@ -79,7 +79,7 @@ void disp_node(node_t node)
         tuple_nd *nd = (tuple_nd*)NOD(node);
 
         printf("((");
-        size_t i;
+        unsigned long long i;
         for (i = 0; i < nd->elems_n; i++)
         {
             disp_node(nd->elems_nd[i]);
@@ -93,7 +93,7 @@ void disp_node(node_t node)
         dict_nd *nd = (dict_nd*)NOD(node);
 
         printf("({");
-        size_t i;
+        unsigned long long i;
         for (i = 0; i < nd->kvs_n; i++)
         {
             disp_node(nd->kvs_nd[i].key_nd);
@@ -109,7 +109,7 @@ void disp_node(node_t node)
         set_nd *nd = (set_nd*)NOD(node);
 
         printf("({");
-        size_t i;
+        unsigned long long i;
         for (i = 0; i < nd->elems_n; i++)
         {
             disp_node(nd->elems_nd[i]);
@@ -171,7 +171,7 @@ void disp_node(node_t node)
         if_nd *nd = (if_nd*)NOD(node);
 
         printf("(");
-        size_t i;
+        unsigned long long i;
         for (i = 0; i < nd->case_n; i++)
         {
             printf("[");
@@ -189,7 +189,7 @@ void disp_node(node_t node)
 
         printf("(");
         disp_node(nd->check_nd);
-        size_t i;
+        unsigned long long i;
         for (i = 0; i < nd->case_n; i++)
         {
             printf(", [");
@@ -467,9 +467,9 @@ void free_node(node_t node)
     un_crash("free_node function: invalid node type `%d`", TYP(node));
 }
 
-void free_nodes(node_t *nodes, size_t nodes_s)
+void free_nodes(node_t *nodes, unsigned long long nodes_s)
 {
-    size_t i;
+    unsigned long long i;
     for (i = 0; i < nodes_s; i++)
         free_node(nodes[i]);
     fre(nodes);
@@ -525,7 +525,7 @@ str_nd *set_str_nd(tok_t str_tok)
     return str;
 }
 
-list_nd *set_list_nd(size_t elems_n, node_t *elems_nd)
+list_nd *set_list_nd(unsigned long long elems_n, node_t *elems_nd)
 {
     list_nd *list;
     alloc(list, list_nd, 1);
@@ -536,7 +536,7 @@ list_nd *set_list_nd(size_t elems_n, node_t *elems_nd)
     return list;
 }
 
-tuple_nd *set_tuple_nd(size_t elems_n, node_t *elems_nd)
+tuple_nd *set_tuple_nd(unsigned long long elems_n, node_t *elems_nd)
 {
     tuple_nd *tuple;
     alloc(tuple, tuple_nd, 1);
@@ -547,7 +547,7 @@ tuple_nd *set_tuple_nd(size_t elems_n, node_t *elems_nd)
     return tuple;
 }
 
-dict_nd *set_dict_nd(size_t kvs_n, struct __kv *kvs_nd)
+dict_nd *set_dict_nd(unsigned long long kvs_n, struct __kv *kvs_nd)
 {
     dict_nd *dict;
     alloc(dict, dict_nd, 1);
@@ -558,7 +558,7 @@ dict_nd *set_dict_nd(size_t kvs_n, struct __kv *kvs_nd)
     return dict;
 }
 
-set_nd *set_set_nd(size_t elems_n, node_t *elems_nd)
+set_nd *set_set_nd(unsigned long long elems_n, node_t *elems_nd)
 {
     set_nd *set;
     alloc(set, set_nd, 1);
@@ -626,7 +626,7 @@ var_access_nd *set_var_access_nd(tok_t name_tok)
     return var_access;
 }
 
-if_nd *set_if_nd(size_t case_n, struct __case *cases, node_t ebody_nd)
+if_nd *set_if_nd(unsigned long long case_n, struct __case *cases, node_t ebody_nd)
 {
     if_nd *if_;
     alloc(if_, if_nd, 1);
@@ -638,7 +638,7 @@ if_nd *set_if_nd(size_t case_n, struct __case *cases, node_t ebody_nd)
     return if_;
 }
 
-switch_nd *set_switch_nd(node_t check_nd, size_t case_n, struct __case *cases, node_t dbody_nd)
+switch_nd *set_switch_nd(node_t check_nd, unsigned long long case_n, struct __case *cases, node_t dbody_nd)
 {
     switch_nd *switch_;
     alloc(switch_, switch_nd, 1);
@@ -722,9 +722,9 @@ struct __kv set_kv(node_t key, node_t val)
     return kv;
 }
 
-void free_kvs(struct __kv *kvs, size_t kv_n)
+void free_kvs(struct __kv *kvs, unsigned long long kv_n)
 {
-    size_t i;
+    unsigned long long i;
     for (i = 0; i < kv_n; i++)
         free_kv(kvs[i]);
     fre(kvs);
@@ -746,9 +746,9 @@ struct __case set_case(node_t cond, node_t body)
     return case_;
 }
 
-void free_cases(struct __case *cases, size_t case_n)
+void free_cases(struct __case *cases, unsigned long long case_n)
 {
-    size_t i;
+    unsigned long long i;
     for (i = 0; i < case_n; i++)
         free_case(cases[i]);
     fre(cases);

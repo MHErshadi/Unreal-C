@@ -167,9 +167,9 @@ void disp_val(val_t value, char end)
     un_crash("disp_val function: invalid value type `%d`", TYP(value));
 }
 
-void free_vals(val_t *vals, size_t vals_s)
+void free_vals(val_t *vals, unsigned long long vals_s)
 {
-    size_t i;
+    unsigned long long i;
     for (i = 0; i < vals_s; i++)
         free_val(vals[i]);
     fre(vals);
@@ -299,9 +299,9 @@ int val_type(val_t value, enum val_t type)
     return TYP(value) == type;
 }
 
-int vals_has(const val_t *vals, size_t vals_s, val_t val)
+int vals_has(const val_t *vals, unsigned long long vals_s, val_t val)
 {
-    size_t i;
+    unsigned long long i;
     for (i = 0; i < vals_s; i++)
         if (cmp_op(vals[i], val))
             return 1;
@@ -329,26 +329,26 @@ void free_kval(kval_t kval)
     free_val(VAL(kval));
 }
 
-void free_kvals(kval_t *kvals, size_t kvals_s)
+void free_kvals(kval_t *kvals, unsigned long long kvals_s)
 {
-    size_t i;
+    unsigned long long i;
     for (i = 0; i < kvals_s; i++)
         free_kval(kvals[i]);
     fre(kvals);
 }
 
-int kvals_has(const kval_t *kvals, size_t kvals_s, val_t key)
+int kvals_has(const kval_t *kvals, unsigned long long kvals_s, val_t key)
 {
-    size_t i;
+    unsigned long long i;
     for (i = 0; i < kvals_s; i++)
         if (cmp_op(KEY(kvals[i]), key))
             return 1;
     return 0;
 }
 
-int kvals_haskv(const kval_t *kvals, size_t kvals_s, kval_t kval)
+int kvals_haskv(const kval_t *kvals, unsigned long long kvals_s, kval_t kval)
 {
-    size_t i;
+    unsigned long long i;
     for (i = 0; i < kvals_s; i++)
         if (cmp_op(KEY(kvals[i]), KEY(kval)) && cmp_op(VAL(kvals[i]), VAL(kval)))
             return 1;

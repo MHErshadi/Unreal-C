@@ -107,11 +107,11 @@ tok_t set_tok(enum tok_t type, char *val, pos_t poss, pos_t pose);
 void free_tok(tok_t tok);
 
 int tok_type(tok_t tok, enum tok_t type);
-int tok_types(tok_t tok, const enum tok_t *types, size_t size);
+int tok_types(tok_t tok, const enum tok_t *types, unsigned long long size);
 int tok_val(tok_t tok, const char *val);
-int tok_vals(tok_t tok, const char **vals, size_t size);
+int tok_vals(tok_t tok, const char **vals, unsigned long long size);
 int tok_match(tok_t tok, enum tok_t type, const char *val);
-int tok_matchs(tok_t tok, enum tok_t type, const char **vals, size_t size);
+int tok_matchs(tok_t tok, enum tok_t type, const char **vals, unsigned long long size);
 
 int is_kwd(const char *val);
 

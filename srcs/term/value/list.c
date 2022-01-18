@@ -6,7 +6,7 @@
 #include "../../macro.h"
 #include "valm.h"
 
-list_t *list_set(size_t elems_n, val_t *elems)
+list_t *list_set(unsigned long long elems_n, val_t *elems)
 {
     list_t *val;
     alloc(val, list_t, 1);
@@ -22,7 +22,7 @@ list_t *list_cpy(const list_t *val)
     val_t *elems;
     alloc(elems, val_t, val->elems_n);
 
-    size_t i;
+    unsigned long long i;
     for (i = 0; i < val->elems_n; i++)
         elems[i] = cpy_val(ELM(val)[i]);
 
@@ -39,7 +39,7 @@ void list_disp(const list_t *val)
     }
 
     disp_val(*ELM(val), '\0');
-    size_t i;
+    unsigned long long i;
     for (i = 1; i < val->elems_n; i++)
     {
         printf(", ");
@@ -57,12 +57,12 @@ void list_free(list_t *val)
 
 list_t *list_append(const list_t *op1, val_t op2)
 {
-    size_t prod_s = op1->elems_n + 1;
+    unsigned long long prod_s = op1->elems_n + 1;
 
     val_t *prod;
     alloc(prod, val_t, prod_s);
 
-    size_t i;
+    unsigned long long i;
     for (i = 0; i < op1->elems_n; i++)
         prod[i] = cpy_val(ELM(op1)[i]);
     prod[op1->elems_n] = cpy_val(op2);
@@ -72,7 +72,7 @@ list_t *list_append(const list_t *op1, val_t op2)
 
 list_t *list_rem(const list_t *op1, const int_t *op2)
 {
-    size_t prod_s = op1->elems_n - 1;
+    unsigned long long prod_s = op1->elems_n - 1;
 
     val_t *prod;
     alloc(prod, val_t, prod_s);
@@ -81,10 +81,10 @@ list_t *list_rem(const list_t *op1, const int_t *op2)
     if (idx < 0)
         idx = op1->elems_n + idx;
 
-    size_t i;
+    unsigned long long i;
     for (i = 0; i < idx; i++)
         prod[i] = cpy_val(ELM(op1)[i]);
-    size_t j;
+    unsigned long long j;
     for (j = idx + 1; j < op1->elems_n; j++, i++)
         prod[i] = cpy_val(ELM(op1)[j]);
 
@@ -94,15 +94,15 @@ list_t *list_rem(const list_t *op1, const int_t *op2)
 list_t *list_repeat(const list_t *op1, const int_t *op2)
 {
     unsigned long long rep_n = int_get_ull(op2);
-    size_t prod_s = op1->elems_n * rep_n;
+    unsigned long long prod_s = op1->elems_n * rep_n;
 
     val_t *prod;
     alloc(prod, val_t, prod_s);
 
-    size_t i;
+    unsigned long long i;
     for (i = 0; i < prod_s; i += op1->elems_n)
     {
-        size_t j;
+        unsigned long long j;
         for (j = 0; j < op1->elems_n; j++)
             prod[i + j] = cpy_val(ELM(op1)[j]);
     }
@@ -122,7 +122,7 @@ bool_t *list_nequal(const list_t *op1, const list_t *op2)
 
 bool_t *list_has(const list_t *op1, val_t op2)
 {
-    size_t i;
+    unsigned long long i;
     for (i = 0; i < op1->elems_n; i++)
         if (cmp_op(ELM(op1)[i], op2))
             return bool_set(1);
@@ -144,7 +144,7 @@ int list_cmp(const list_t *op1, const list_t *op2)
     if (op1->elems_n != op2->elems_n)
         return 0;
 
-    size_t i;
+    unsigned long long i;
     for (i = 0; i < op1->elems_n; i++)
         if (!cmp_op(ELM(op1)[i], ELM(op2)[i]))
             return 0;

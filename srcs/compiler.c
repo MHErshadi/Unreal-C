@@ -7,7 +7,7 @@
 #define DEF_MEMS_S 32
 #define DEF_MEMS_D 2
 
-#define NULL_FUNS ((funs_t){0, NULL})
+#define NULL_FUNCS ((funcs_t){0, NULL})
 
 struct __strs
 {
@@ -15,7 +15,8 @@ struct __strs
     char *deps;
     char *defs;
     char *main;
-    funs_t funs;
+    char *end_main;
+    char *funcs_head;
 };
 
 struct __def_mem
@@ -28,112 +29,79 @@ struct __def_mem
 
 struct __def_mems
 {
-    size_t dma;
-    size_t dms;
+    unsigned long long dma;
+    unsigned long long dms;
 
     struct __def_mem *mems;
 };
 
 struct __strs conv_cres_to_strs(cres_t other);
+void free_strs(struct __strs strs);
 
 struct __def_mem set_def_mem(unsigned id, enum val_t type, char *val);
 void free_def_mem(struct __def_mem def_mem);
 int cmp_def_mem(struct __def_mem def_mem, enum val_t type, const char *val);
 unsigned find_def_mem(struct __def_mems def_mems, enum val_t type, const char *val);
 
-struct __def_mems set_def_mems(size_t dma, size_t dms, struct __def_mem *mems);
+struct __def_mems set_def_mems(unsigned long long dma, unsigned long long dms, struct __def_mem *mems);
 void free_def_mems(struct __def_mems def_mems);
 
-void comp_succ(cres_t *res, char *incs, char *deps, char *defs, char *main, funs_t funs);
+void comp_succ(cres_t *res, char *incs, char *deps, char *defs, char *main, char *end_main, char *funcs_head, funcs_t funcs);
 void comp_fail(cres_t *res, runtime_err_t error);
 struct __strs reg_comp_res(cres_t *res, cres_t other);
-
-funs_t concat_funs(funs_t funs1, funs_t funs2);
 
 char *comp_incs(void);
 char *comp_deps(void);
 char *comp_defs(void);
 char *comp_main(void);
-funs_t comp_funs(void);
+char *comp_funcs_head(void);
+funcs_t comp_funcs(void);
 
-cres_t comp_int(int_nd *node, struct __def_mems *def_mems);
-cres_t comp_float(float_nd *node, struct __def_mems *def_mems);
-cres_t comp_cmpx(cmpx_nd *node, struct __def_mems *def_mems);
+cres_t comp_node(node_t node, funcs_t *funcs, struct __def_mems *def_mems, unsigned *val_id);
+cres_t comp_int(int_nd *node, funcs_t *funcs, struct __def_mems *def_mems);
+cres_t comp_float(float_nd *node, funcs_t *funcs, struct __def_mems *def_mems);
+cres_t comp_cmpx(cmpx_nd *node, funcs_t *funcs, struct __def_mems *def_mems);
 cres_t comp_bool(bool_nd *node);
 cres_t comp_none(void);
-cres_t comp_str(str_nd *node, struct __def_mems *def_mems);
-cres_t comp_list(list_nd *node);
-cres_t comp_tuple(tuple_nd *node);
-cres_t comp_dict(dict_t *node);
-cres_t comp_set(set_t *node);
-cres_t comp_bin_op(bin_op_nd *node);
+cres_t comp_str(str_nd *node, funcs_t *funcs, struct __def_mems *def_mems);
+cres_t comp_list(list_nd *node, funcs_t *funcs, struct __def_mems *def_mems, unsigned *val_id);
+cres_t comp_tuple(tuple_nd *node, funcs_t *funcs, struct __def_mems *def_mems, unsigned *val_id);
+cres_t comp_dict(dict_nd *node, funcs_t *funcs, struct __def_mems *def_mems, unsigned *val_id);
+cres_t comp_set(set_nd *node, funcs_t *funcs, struct __def_mems *def_mems, unsigned *val_id);
+cres_t comp_bin_op(bin_op_nd *node, funcs_t *funcs, struct __def_mems *def_mems, unsigned *val_id);
 
 int ull_digits(unsigned long long number);
 
 cres_t compile(node_t node)
 {
-    size_t dma = DEF_MEMS_S;
+    unsigned long long dma = DEF_MEMS_S;
     struct __def_mem *mems;
     alloc(mems, struct __def_mem, dma);
 
     struct __def_mems def_mems = set_def_mems(dma, 0, mems);
 
-    char *incs = comp_incs();
-    char *deps = comp_deps();
-    char *defs = comp_defs();
-    char *main = comp_main();
-    funs_t funs = comp_funs();
+    funcs_t funcs = comp_funcs();
 
-    printf("%llu\n", funs.size);
+    unsigned val_id = 0;
 
-    cres_t comp_res;
-    switch (TYP(node))
-    {
-    case INT_N:
-        comp_res = comp_int((int_nd*)NOD(node), &def_mems);
-        break;
-    case FLOAT_N:
-        comp_res = comp_float((float_nd*)NOD(node), &def_mems);
-        break;
-    case CMPX_N:
-        comp_res = comp_cmpx((cmpx_nd*)NOD(node), &def_mems);
-        break;
-    case BOOL_N:
-        comp_res = comp_bool((bool_nd*)NOD(node));
-        break;
-    case NONE_N:
-        comp_res = comp_none();
-        break;
-    case STR_N:
-        comp_res = comp_str((str_nd*)NOD(node), &def_mems);
-        break;
-    case LIST_N:
-        comp_res = comp_list((list_nd*)NOD(node));
-        break;
-    case TUPLE_N:
-        comp_res = comp_tuple((tuple_nd*)NOD(node));
-        break;
-    default:
-        un_crash("compile function: invalid node type `%d`\n", TYP(node));
-        break;
-    }
-
-    printf("%llu\n", funs.size);
+    cres_t comp_res = comp_node(node, &funcs, &def_mems, &val_id);
 
     free_def_mems(def_mems);
 
     if (HERR(comp_res))
     {
-        fre(incs);
-        fre(deps);
-        fre(defs);
-        fre(main);
-        free_funs(funs);
+        free_funcs(funcs);
 
         cres_t res;
         comp_fail(&res, ERR(comp_res));
         return res;
     }
+
+    char *incs = comp_incs();
+    char *deps = comp_deps();
+    char *defs = comp_defs();
+    char *main = comp_main();
+    char *funcs_head = comp_funcs_head();
 
     if (comp_res.incs)
     {
@@ -142,6 +110,7 @@ cres_t compile(node_t node)
 
         fre(comp_res.incs);
     }
+
     if (comp_res.deps)
     {
         ralloc(deps, char, strlen(deps) + strlen(comp_res.deps) + 1);
@@ -149,6 +118,7 @@ cres_t compile(node_t node)
     
         fre(comp_res.deps);
     }
+
     if (comp_res.defs)
     {
         ralloc(defs, char, strlen(defs) + strlen(comp_res.defs) + 1);
@@ -156,6 +126,7 @@ cres_t compile(node_t node)
 
         fre(comp_res.defs);
     }
+
     if (comp_res.main)
     {
         ralloc(main, char, strlen(main) + strlen(comp_res.main) + 1);
@@ -163,44 +134,49 @@ cres_t compile(node_t node)
 
         fre(comp_res.main);
     }
-    if (comp_res.funs.size)
-        concat_funs(funs, comp_res.funs);
 
-    ralloc(main, char, strlen(main) + 15);
-    strcat(main, ";\nreturn 0;\n}\n");
+    if (comp_res.end_main)
+    {
+        ralloc(main, char, strlen(main) + strlen(comp_res.end_main) + 24);
+        sprintf(main, "%s;%s\ncf_gc();\nreturn 0;\n}\n", main, comp_res.end_main);
+    }
+    else
+    {
+        ralloc(main, char, strlen(main) + 24);
+        strcat(main, ";\ncf_gc();\nreturn 0;\n}\n");
+    }
 
-    ralloc(funs.str[0], char, strlen(funs.str[0]) + 3);
-    strcat(funs.str[0], "}\n");
+    ralloc(funcs.strs[0], char, strlen(funcs.strs[0]) + 3);
+    strcat(funcs.strs[0], "}\n");
 
     cres_t res;
-    comp_succ(&res, incs, deps, defs, main, funs);
+    comp_succ(&res, incs, deps, defs, main, NULL, funcs_head, funcs);
     return res;
 }
 
-
-funs_t set_funs(size_t size, char **str)
+funcs_t set_funcs(unsigned long long size, char **strs)
 {
-    funs_t funs;
-    funs.size = size;
-    funs.str = str;
+    funcs_t funcs;
+    funcs.size = size;
+    funcs.strs = strs;
 
-    return funs;
+    return funcs;
 }
 
-void disp_funs(funs_t funs)
+void disp_funcs(funcs_t funcs)
 {
-    size_t i;
-    for (i = 0; i < funs.size; i++)
-        printf("%s\n", funs.str[i]);
+    unsigned long long i;
+    for (i = 0; i < funcs.size; i++)
+        printf("%s\n", funcs.strs[i]);
 }
 
-void free_funs(funs_t funs)
+void free_funcs(funcs_t funcs)
 {
-    size_t i;
-    for (i = 0; i < funs.size; i++)
-        fre(funs.str[i]);
+    unsigned long long i;
+    for (i = 0; i < funcs.size; i++)
+        fre(funcs.strs[i]);
 
-    fre(funs.str);
+    fre(funcs.strs);
 }
 
 struct __strs conv_cres_to_strs(cres_t other)
@@ -210,9 +186,31 @@ struct __strs conv_cres_to_strs(cres_t other)
     strs.deps = other.deps;
     strs.defs = other.defs;
     strs.main = other.main;
-    strs.funs = other.funs;
+    strs.end_main = other.end_main;
+    strs.funcs_head = other.funcs_head;
 
     return strs;
+}
+
+void free_strs(struct __strs strs)
+{
+    if (strs.incs)
+        fre(strs.incs);
+
+    if (strs.deps)
+        fre(strs.deps);
+
+    if (strs.defs)
+        fre(strs.defs);
+
+    if (strs.main)
+        fre(strs.main);
+
+    if (strs.end_main)
+        fre(strs.end_main);
+
+    if (strs.funcs_head)
+        fre(strs.funcs_head);
 }
 
 struct __def_mem set_def_mem(unsigned id, enum val_t type, char *val)
@@ -237,7 +235,7 @@ int cmp_def_mem(struct __def_mem def_mem, enum val_t type, const char *val)
 
 unsigned find_def_mem(struct __def_mems def_mems, enum val_t type, const char *val)
 {
-    size_t i;
+    unsigned long long i;
     for (i = 0; i < def_mems.dms; i++)
         if (cmp_def_mem(def_mems.mems[i], type, val))
             return def_mems.mems[i].id;
@@ -245,7 +243,7 @@ unsigned find_def_mem(struct __def_mems def_mems, enum val_t type, const char *v
     return 0;
 }
 
-struct __def_mems set_def_mems(size_t dma, size_t dms, struct __def_mem *mems)
+struct __def_mems set_def_mems(unsigned long long dma, unsigned long long dms, struct __def_mem *mems)
 {
     struct __def_mems def_mems;
     def_mems.dma = dma;
@@ -257,21 +255,23 @@ struct __def_mems set_def_mems(size_t dma, size_t dms, struct __def_mem *mems)
 
 void free_def_mems(struct __def_mems def_mems)
 {
-    size_t i;
+    unsigned long long i;
     for (i = 0; i < def_mems.dms; i++)
         free_def_mem(def_mems.mems[i]);
 
     fre(def_mems.mems);
 }
 
-void comp_succ(cres_t *res, char *incs, char *deps, char *defs, char *main, funs_t funs)
+void comp_succ(cres_t *res, char *incs, char *deps, char *defs, char *main, char *end_main, char *funcs_head, funcs_t funcs)
 {
     HERR(*res) = 0;
     res->incs = incs;
     res->deps = deps;
     res->defs = defs;
     res->main = main;
-    res->funs = funs;
+    res->end_main = end_main;
+    res->funcs_head = funcs_head;
+    res->funcs = funcs;
 }
 
 void comp_fail(cres_t *res, runtime_err_t error)
@@ -291,24 +291,6 @@ struct __strs reg_comp_res(cres_t *res, cres_t other)
     return conv_cres_to_strs(other);
 }
 
-funs_t concat_funs(funs_t funs1, funs_t funs2)
-{
-    size_t res_size = funs1.size + funs2.size;
-    printf("%llu + %llu = %llu\n", funs1.size, funs2.size, res_size);
-
-    char **res_str;
-    alloc(res_str, char*, res_size);
-
-    size_t i, j;
-    for (i = 0; i < funs1.size; i++)
-        res_str[i] = funs1.str[i];
-    for (j = 0; j < funs2.size; j++)
-        res_str[i + j] = funs2.str[j];
-
-    funs_t res = set_funs(res_size, res_str);
-    return res;
-}
-
 char *comp_incs(void)
 {
     char *incs;
@@ -324,7 +306,7 @@ char *comp_deps(void)
     char *deps;
     alloc(deps, char, 41);
 
-    sprintf(deps, "struct __ctx c_ctx = handle_main_ctx();\n");
+    strcpy(deps, "struct __ctx c_ctx = handle_main_ctx();\n");
 
     return deps;
 }
@@ -334,7 +316,7 @@ char *comp_defs(void)
     char *defs;
     alloc(defs, char, 121);
 
-    sprintf(defs, "val_t cd_0 = handle_set_none(&c_ctx);\n");
+    strcpy(defs, "val_t cd_0 = handle_set_none(&c_ctx);\n");
     strcat(defs, "val_t cd_1 = handle_set_bool(1, &c_ctx);\n");
     strcat(defs, "val_t cd_2 = handle_set_bool(0, &c_ctx);\n");
 
@@ -346,25 +328,65 @@ char *comp_main(void)
     char *main;
     alloc(main, char, 35);
 
-    sprintf(main, "int main(int argc, char **argv) {\n");
+    strcpy(main, "int main(int argc, char **argv) {\n");
 
     return main;
 }
 
-funs_t comp_funs(void)
+char *comp_funcs_head(void)
 {
-    char **str;
-    alloc(str, char*, 1);
+    char *funcs_head;
+    alloc(funcs_head, char, 15);
 
-    alloc(str[0], char, 92);
+    strcpy(funcs_head, "void cf_gc();\n");
 
-    sprintf(str[0], "void cf_gc() {\nhandle_free_bool((bool_t*)VAL(cd_1));\nhandle_free_bool((bool_t*)VAL(cd_2));\n");
-
-    funs_t funs = set_funs(1, str);
-    return funs;
+    return funcs_head;
 }
 
-cres_t comp_int(int_nd *node, struct __def_mems *def_mems)
+funcs_t comp_funcs(void)
+{
+    char **strs;
+    alloc(strs, char*, 1);
+
+    alloc(strs[0], char, 92);
+
+    strcpy(strs[0], "void cf_gc() {\nhandle_free_bool((bool_t*)VAL(cd_1));\nhandle_free_bool((bool_t*)VAL(cd_2));\n");
+
+    funcs_t funcs = set_funcs(1, strs);
+    return funcs;
+}
+
+cres_t comp_node(node_t node, funcs_t *funcs, struct __def_mems *def_mems, unsigned *val_id)
+{
+    switch (TYP(node))
+    {
+    case INT_N:
+        return comp_int((int_nd*)NOD(node), funcs, def_mems);
+    case FLOAT_N:
+        return comp_float((float_nd*)NOD(node), funcs, def_mems);
+    case CMPX_N:
+        return comp_cmpx((cmpx_nd*)NOD(node), funcs, def_mems);
+    case BOOL_N:
+        return comp_bool((bool_nd*)NOD(node));
+    case NONE_N:
+        return comp_none();
+    case STR_N:
+        return comp_str((str_nd*)NOD(node), funcs, def_mems);
+    case LIST_N:
+        return comp_list((list_nd*)NOD(node), funcs, def_mems, val_id);
+    case TUPLE_N:
+        return comp_tuple((tuple_nd*)NOD(node), funcs, def_mems, val_id);
+    case DICT_N:
+        return comp_dict((dict_nd*)NOD(node), funcs, def_mems, val_id);
+    case SET_N:
+        return comp_set((set_nd*)NOD(node), funcs, def_mems, val_id);
+    default:
+        un_crash("comp_node function: invalid node type `%d`\n", TYP(node));
+        break;
+    }
+}
+
+cres_t comp_int(int_nd *node, funcs_t *funcs, struct __def_mems *def_mems)
 {
     unsigned id = find_def_mem(*def_mems, INT_V, VAL(node->num_tok));
 
@@ -393,24 +415,17 @@ cres_t comp_int(int_nd *node, struct __def_mems *def_mems)
         def_mems->mems[def_mems->dms - 1] = set_def_mem(id, INT_V, VAL(node->num_tok));
     }
 
-    char **str;
-    alloc(str, char*, 1);
-
-    alloc(str[0], char, ull_digits(id) + 36);
-
-    sprintf(str[0], "handle_free_int((int_t*)VAL(cd_%u));\n", id);
-
-    funs_t funs = set_funs(1, str);
-    printf("%llu\n", funs.size);
+    ralloc(funcs->strs[0], char, strlen(funcs->strs[0]) + ull_digits(id) + 36);
+    sprintf(funcs->strs[0], "%shandle_free_int((int_t*)VAL(cd_%u));\n", funcs->strs[0], id);
 
     fre(node);
 
     cres_t res;
-    comp_succ(&res, NULL, NULL, defs, main, funs);
+    comp_succ(&res, NULL, NULL, defs, main, NULL, NULL, NULL_FUNCS);
     return res;
 }
 
-cres_t comp_float(float_nd *node, struct __def_mems *def_mems)
+cres_t comp_float(float_nd *node, funcs_t *funcs, struct __def_mems *def_mems)
 {
     unsigned id = find_def_mem(*def_mems, FLOAT_V, VAL(node->num_tok));
 
@@ -439,14 +454,17 @@ cres_t comp_float(float_nd *node, struct __def_mems *def_mems)
         def_mems->mems[def_mems->dms - 1] = set_def_mem(id, FLOAT_V, VAL(node->num_tok));
     }
 
+    ralloc(funcs->strs[0], char, strlen(funcs->strs[0]) + ull_digits(id) + 40);
+    sprintf(funcs->strs[0], "%shandle_free_float((float_t*)VAL(cd_%u));\n", funcs->strs[0], id);
+
     fre(node);
 
     cres_t res;
-    comp_succ(&res, NULL, NULL, defs, main, NULL_FUNS);
+    comp_succ(&res, NULL, NULL, defs, main, NULL, NULL, NULL_FUNCS);
     return res;
 }
 
-cres_t comp_cmpx(cmpx_nd *node, struct __def_mems *def_mems)
+cres_t comp_cmpx(cmpx_nd *node, funcs_t *funcs, struct __def_mems *def_mems)
 {
     unsigned id = find_def_mem(*def_mems, CMPX_V, VAL(node->num_tok));
 
@@ -475,10 +493,13 @@ cres_t comp_cmpx(cmpx_nd *node, struct __def_mems *def_mems)
         def_mems->mems[def_mems->dms - 1] = set_def_mem(id, CMPX_V, VAL(node->num_tok));
     }
 
+    ralloc(funcs->strs[0], char, strlen(funcs->strs[0]) + ull_digits(id) + 38);
+    sprintf(funcs->strs[0], "%shandle_free_cmpx((cmpx_t*)VAL(cd_%u));\n", funcs->strs[0], id);
+
     fre(node);
 
     cres_t res;
-    comp_succ(&res, NULL, NULL, defs, main, NULL_FUNS);
+    comp_succ(&res, NULL, NULL, defs, main, NULL, NULL, NULL_FUNCS);
     return res;
 }
 
@@ -488,14 +509,14 @@ cres_t comp_bool(bool_nd *node)
     alloc(main, char, 5);
 
     if (node->id)
-        sprintf(main, "cd_1");
+        strcpy(main, "cd_1");
     else
-        sprintf(main, "cd_2");
+        strcpy(main, "cd_2");
 
     fre(node);
 
     cres_t res;
-    comp_succ(&res, NULL, NULL, NULL, main, NULL_FUNS);
+    comp_succ(&res, NULL, NULL, NULL, main, NULL, NULL, NULL_FUNCS);
     return res;
 }
 
@@ -504,14 +525,14 @@ cres_t comp_none(void)
     char *main;
     alloc(main, char, 5);
 
-    sprintf(main, "cd_0");
+    strcpy(main, "cd_0");
 
     cres_t res;
-    comp_succ(&res, NULL, NULL, NULL, main, NULL_FUNS);
+    comp_succ(&res, NULL, NULL, NULL, main, NULL, NULL, NULL_FUNCS);
     return res;
 }
 
-cres_t comp_str(str_nd *node, struct __def_mems *def_mems)
+cres_t comp_str(str_nd *node, funcs_t *funcs, struct __def_mems *def_mems)
 {
     unsigned id = find_def_mem(*def_mems, STR_V, VAL(node->str_tok));
 
@@ -540,37 +561,186 @@ cres_t comp_str(str_nd *node, struct __def_mems *def_mems)
         def_mems->mems[def_mems->dms - 1] = set_def_mem(id, STR_V, VAL(node->str_tok));
     }
 
+    ralloc(funcs->strs[0], char, strlen(funcs->strs[0]) + ull_digits(id) + 36);
+    sprintf(funcs->strs[0], "%shandle_free_str((str_t*)VAL(cd_%u));\n", funcs->strs[0], id);
+
     fre(node);
 
     cres_t res;
-    comp_succ(&res, NULL, NULL, defs, main, NULL_FUNS);
+    comp_succ(&res, NULL, NULL, defs, main, NULL, NULL, NULL_FUNCS);
     return res;
 }
 
-cres_t comp_list(list_nd *node)
+cres_t comp_list(list_nd *node, funcs_t *funcs, struct __def_mems *def_mems, unsigned *val_id)
 {
     cres_t res;
     HERR(res) = 0;
 
-    
+    char *incs;
+    alloc(incs, char, 1);
+    incs[0] = '\0';
+
+    char *deps;
+    alloc(deps, char, 1);
+    deps[0] = '\0';
+
+    char *defs;
+    alloc(defs, char, 1);
+    defs[0] = '\0';
+
+    char *main;
+    alloc(main, char, ull_digits(*val_id) + ull_digits(node->elems_n) + 17);
+
+    sprintf(main, "val_t cvl_%u[%llu] = {", (*val_id)++, node->elems_n);
+
+    char *end_main;
+    alloc(end_main, char, 1);
+    end_main[0] = '\0';
+
+    char *funcs_head;
+    alloc(funcs_head, char, 1);
+    funcs_head[0] = '\0';
+
+    if (node->elems_n)
+    {
+        struct __strs strs = reg_comp_res(&res, comp_node(node->elems_nd[0], funcs, def_mems, val_id));
+
+        if (HERR(res))
+        {
+            fre(deps);
+            fre(defs);
+            fre(main);
+            fre(end_main);
+            fre(funcs_head);
+            goto ret;
+        }
+
+        if (strs.incs)
+        {
+            ralloc(incs, char, strlen(incs) + strlen(strs.incs) + 1);
+
+            strcat(incs, strs.incs);
+        }
+
+        if (strs.deps)
+        {
+            ralloc(deps, char, strlen(deps) + strlen(strs.deps) + 1);
+
+            strcat(deps, strs.deps);
+        }
+
+        if (strs.defs)
+        {
+            ralloc(defs, char, strlen(defs) + strlen(strs.defs) + 1);
+
+            strcat(defs, strs.defs);
+        }
+
+        if (strs.end_main)
+        {
+            ralloc(end_main, char, strlen(end_main) + strlen(strs.end_main) + 1);
+
+            strcat(end_main, strs.end_main);
+        }
+
+        if (strs.funcs_head)
+        {
+            ralloc(funcs_head, char, strlen(funcs_head) + strlen(strs.funcs_head) + 1);
+
+            strcat(funcs_head, strs.funcs_head);
+        }
+
+        ralloc(main, char, strlen(main) + strlen(strs.main) + 1);
+
+        strcat(main, strs.main);
+
+        free_strs(strs);
+
+        unsigned long long i;
+        for (i = 1; i < node->elems_n; i++)
+        {
+            strs = reg_comp_res(&res, comp_node(node->elems_nd[i], funcs, def_mems, val_id));
+            if (HERR(res))
+            {
+                fre(deps);
+                fre(defs);
+                fre(main);
+                fre(end_main);
+                fre(funcs_head);
+                goto ret;
+            }
+
+            if (strs.incs)
+            {
+                ralloc(incs, char, strlen(incs) + strlen(strs.incs) + 1);
+
+                strcat(incs, strs.incs);
+            }
+
+            if (strs.deps)
+            {
+                ralloc(deps, char, strlen(deps) + strlen(strs.deps) + 1);
+
+                strcat(deps, strs.deps);
+            }
+
+            if (strs.defs)
+            {
+                ralloc(defs, char, strlen(defs) + strlen(strs.defs) + 1);
+
+                strcat(defs, strs.defs);
+            }
+
+            if (strs.end_main)
+            {
+                ralloc(end_main, char, strlen(end_main) + strlen(strs.end_main) + 1);
+
+                strcat(end_main, strs.end_main);
+            }
+
+            if (strs.funcs_head)
+            {
+                ralloc(funcs_head, char, strlen(funcs_head) + strlen(strs.funcs_head) + 1);
+
+                strcat(funcs_head, strs.funcs_head);
+            }
+
+            ralloc(main, char, strlen(main) + strlen(strs.main) + 3);
+
+            sprintf(main, "%s, %s", main, strs.main);
+
+            free_strs(strs);
+        }
+    }
+
+    ralloc(main, char, strlen(main) + 2);
+
+    strcat(main, "}");
+
+    comp_succ(&res, incs, deps, defs, main, end_main, funcs_head, NULL_FUNCS);
+
+    ret:
+    free_nodes(node->elems_nd, node->elems_n);
+    fre(node);
+    return res;
 }
 
-cres_t comp_tuple(tuple_nd *node)
+cres_t comp_tuple(tuple_nd *node, funcs_t *funcs, struct __def_mems *def_mems, unsigned *val_id)
 {
 
 }
 
-cres_t comp_dict(dict_t *node)
+cres_t comp_dict(dict_nd *node, funcs_t *funcs, struct __def_mems *def_mems, unsigned *val_id)
 {
 
 }
 
-cres_t comp_set(set_t *node)
+cres_t comp_set(set_nd *node, funcs_t *funcs, struct __def_mems *def_mems, unsigned *val_id)
 {
 
 }
 
-cres_t comp_bin_op(bin_op_nd *node)
+cres_t comp_bin_op(bin_op_nd *node, funcs_t *funcs, struct __def_mems *def_mems, unsigned *val_id)
 {
 
 }

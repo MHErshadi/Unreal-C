@@ -5,11 +5,11 @@
 
 typedef struct
 {
-    size_t kvals_n;
+    unsigned long long kvals_n;
     kval_t *kvals;
 } dict_t;
 
-dict_t *dict_set(size_t kvals_n, kval_t *kvals);
+dict_t *dict_set(unsigned long long kvals_n, kval_t *kvals);
 
 dict_t *dict_cpy(const dict_t *val);
 

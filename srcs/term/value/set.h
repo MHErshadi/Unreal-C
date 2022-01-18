@@ -6,11 +6,11 @@
 
 typedef struct
 {
-    size_t elems_n;
+    unsigned long long elems_n;
     val_t *elems;
 } set_t;
 
-set_t *set_set(size_t elems_n, val_t *elems);
+set_t *set_set(unsigned long long elems_n, val_t *elems);
 
 set_t *set_cpy(const set_t *val);
 

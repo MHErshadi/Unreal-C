@@ -72,13 +72,13 @@ typedef struct
 
 typedef struct
 {
-    size_t elems_n;
+    unsigned long long elems_n;
     node_t *elems_nd;
 } list_nd;
 
 typedef struct
 {
-    size_t elems_n;
+    unsigned long long elems_n;
     node_t *elems_nd;
 } tuple_nd;
 
@@ -90,13 +90,13 @@ struct __kv
 
 typedef struct
 {
-    size_t kvs_n;
+    unsigned long long kvs_n;
     struct __kv *kvs_nd;
 } dict_nd;
 
 typedef struct
 {
-    size_t elems_n;
+    unsigned long long elems_n;
     node_t *elems_nd;
 } set_nd;
 
@@ -141,7 +141,7 @@ struct __case
 
 typedef struct
 {
-    size_t case_n;
+    unsigned long long case_n;
     struct __case *cases;
 
     node_t ebody_nd;
@@ -151,7 +151,7 @@ typedef struct
 {
     node_t check_nd;
 
-    size_t case_n;
+    unsigned long long case_n;
     struct __case *cases;
 
     node_t dbody_nd;
@@ -200,24 +200,24 @@ typedef struct
 node_t set_node(enum node_t type, void *nd, pos_t poss, pos_t pose);
 void disp_node(node_t node);
 void free_node(node_t node);
-void free_nodes(node_t *nodes, size_t nodes_s);
+void free_nodes(node_t *nodes, unsigned long long nodes_s);
 
 int_nd *set_int_nd(tok_t num_tok);
 float_nd *set_float_nd(tok_t num_tok);
 cmpx_nd *set_cmpx_nd(tok_t num_tok);
 bool_nd *set_bool_nd(int id);
 str_nd *set_str_nd(tok_t str_tok);
-list_nd *set_list_nd(size_t elems_n, node_t *elems_nd);
-tuple_nd *set_tuple_nd(size_t elems_n, node_t *elems_nd);
-dict_nd *set_dict_nd(size_t kvs_n, struct __kv *kvs_nd);
-set_nd *set_set_nd(size_t elems_n, node_t *elems_nd);
+list_nd *set_list_nd(unsigned long long elems_n, node_t *elems_nd);
+tuple_nd *set_tuple_nd(unsigned long long elems_n, node_t *elems_nd);
+dict_nd *set_dict_nd(unsigned long long kvs_n, struct __kv *kvs_nd);
+set_nd *set_set_nd(unsigned long long elems_n, node_t *elems_nd);
 bin_op_nd *set_bin_op_nd(node_t op1_nd, tok_t op_tok, node_t op2_nd);
 unary_op_nd *set_unary_op_nd(tok_t op_tok, node_t op_nd);
 idx_nd *set_idx_nd(node_t op_nd, node_t idxs_nd);
 var_assign_nd *set_var_assign_nd(int *props, tok_t name_tok, tok_t assign_tok, node_t val_nd);
 var_access_nd *set_var_access_nd(tok_t name_tok);
-if_nd *set_if_nd(size_t case_n, struct __case *cases, node_t ebody_nd);
-switch_nd *set_switch_nd(node_t check_nd, size_t case_n, struct __case *cases, node_t dbody_nd);
+if_nd *set_if_nd(unsigned long long case_n, struct __case *cases, node_t ebody_nd);
+switch_nd *set_switch_nd(node_t check_nd, unsigned long long case_n, struct __case *cases, node_t dbody_nd);
 for_nd *set_for_nd(tok_t name_tok, node_t start_nd, node_t end_nd, node_t step_nd, node_t body_nd);
 foreach_nd *set_foreach_nd(tok_t name_tok, node_t iter_nd, node_t body_nd);
 while_nd *set_while_nd(node_t cond_nd, node_t body_nd);
@@ -225,11 +225,11 @@ dowhile_nd *set_dowhile_nd(node_t body_nd, node_t cond_nd);
 loop_nd *set_loop_nd(node_t init_nd, node_t cond_nd, node_t step_nd, node_t body_nd);
 
 struct __kv set_kv(node_t key, node_t val);
-void free_kvs(struct __kv *kvs, size_t kv_n);
+void free_kvs(struct __kv *kvs, unsigned long long kv_n);
 void free_kv(struct __kv kv);
 
 struct __case set_case(node_t cond, node_t body);
-void free_cases(struct __case *cases, size_t case_n);
+void free_cases(struct __case *cases, unsigned long long case_n);
 void free_case(struct __case case_);
 
 int node_type(node_t node, enum node_t type);

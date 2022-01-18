@@ -4,7 +4,7 @@
 #include "../../macro.h"
 #include "valm.h"
 
-set_t *set_set(size_t elems_n, val_t *elems)
+set_t *set_set(unsigned long long elems_n, val_t *elems)
 {
     set_t *val;
     alloc(val, set_t, 1);
@@ -20,7 +20,7 @@ set_t *set_cpy(const set_t *val)
     val_t *elems;
     alloc(elems, val_t, val->elems_n);
 
-    size_t i;
+    unsigned long long i;
     for (i = 0; i < val->elems_n; i++)
         elems[i] = cpy_val(ELM(val)[i]);
 
@@ -37,7 +37,7 @@ void set_disp(const set_t *val)
     }
 
     disp_val(*ELM(val), '\0');
-    size_t i;
+    unsigned long long i;
     for (i = 1; i < val->elems_n; i++)
     {
         printf(", ");
@@ -55,13 +55,13 @@ void set_free(set_t *val)
 
 set_t *set_append(const set_t *op1, val_t op2)
 {
-    size_t prod_s = op1->elems_n + 1;
+    unsigned long long prod_s = op1->elems_n + 1;
 
     val_t *prod;
     alloc(prod, val_t, prod_s);
 
     int sadd = 1;
-    size_t i;
+    unsigned long long i;
     for (i = 0; i < op1->elems_n; i++)
     {
         if (cmp_op(ELM(op1)[i], op2))
@@ -88,7 +88,7 @@ bool_t *set_nequal(const set_t *op1, const set_t *op2)
 
 bool_t *set_has(const set_t *op1, val_t op2)
 {
-    size_t i;
+    unsigned long long i;
     for (i = 0; i < op1->elems_n; i++)
         if (cmp_op(ELM(op1)[i], op2))
             return bool_set(1);
@@ -110,7 +110,7 @@ int set_cmp(const set_t *op1, const set_t *op2)
     if (op1->elems_n != op2->elems_n)
         return 0;
 
-    size_t i;
+    unsigned long long i;
     for (i = 0; i < op1->elems_n; i++)
         if (!vals_has(ELM(op2), op2->elems_n, ELM(op1)[i]))
             return 0;

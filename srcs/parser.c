@@ -26,8 +26,8 @@ pres_t expo(void);
 pres_t idx(void);
 pres_t core(void);
 
-pres_t bin_op(pres_t (*func1)(void), const enum tok_t *ops, size_t ops_s, pres_t (*func2)(void));
-pres_t bin_opi(pres_t (*func1)(void), const enum tok_t *ops, size_t ops_s, const char **opsi, size_t opsi_s, pres_t (*func2)(void));
+pres_t bin_op(pres_t (*func1)(void), const enum tok_t *ops, unsigned long long ops_s, pres_t (*func2)(void));
+pres_t bin_opi(pres_t (*func1)(void), const enum tok_t *ops, unsigned long long ops_s, const char **opsi, unsigned long long opsi_s, pres_t (*func2)(void));
 pres_t list_expr(tok_t tok);
 pres_t dict_expr(tok_t tok);
 pres_t set_expr(tok_t tok, node_t fst_nd);
@@ -98,7 +98,7 @@ pres_t tuple(void)
     {
         toks_ext++;
 
-        size_t elems_s = TUPLE_S, elems_n = 1;
+        unsigned long long elems_s = TUPLE_S, elems_n = 1;
         node_t *elems;
         alloc(elems, node_t, elems_s);
         *elems = fst;
@@ -586,7 +586,7 @@ pres_t core(void)
     return res;
 }
 
-pres_t bin_op(pres_t (*func1)(void), const enum tok_t *ops, size_t ops_s, pres_t (*func2)(void))
+pres_t bin_op(pres_t (*func1)(void), const enum tok_t *ops, unsigned long long ops_s, pres_t (*func2)(void))
 {
     pres_t res;
     HERR(res) = 0;
@@ -614,7 +614,7 @@ pres_t bin_op(pres_t (*func1)(void), const enum tok_t *ops, size_t ops_s, pres_t
     return res;
 }
 
-pres_t bin_opi(pres_t (*func1)(void), const enum tok_t *ops, size_t ops_s, const char **opsi, size_t opsi_s, pres_t (*func2)(void))
+pres_t bin_opi(pres_t (*func1)(void), const enum tok_t *ops, unsigned long long ops_s, const char **opsi, unsigned long long opsi_s, pres_t (*func2)(void))
 {
     pres_t res;
     HERR(res) = 0;
@@ -657,7 +657,7 @@ pres_t list_expr(tok_t tok)
         return res;
     }
 
-    size_t elems_s = LIST_S, elems_n = 0;
+    unsigned long long elems_s = LIST_S, elems_n = 0;
     node_t *elems;
     alloc(elems, node_t, elems_s);
 
@@ -750,7 +750,7 @@ pres_t dict_expr(tok_t tok)
         return res;
     }
 
-    size_t kvs_s = DICT_S, kvs_n = 1;
+    unsigned long long kvs_s = DICT_S, kvs_n = 1;
     struct __kv *kvs;
     alloc(kvs, struct __kv, kvs_s);
     *kvs = set_kv(fst_k, fst_v);
@@ -812,7 +812,7 @@ pres_t set_expr(tok_t tok, node_t fst_nd)
     pres_t res;
     HERR(res) = 0;
 
-    size_t elems_s = SET_S, elems_n = 1;
+    unsigned long long elems_s = SET_S, elems_n = 1;
     node_t *elems;
     alloc(elems, node_t, elems_s);
     *elems = fst_nd;
@@ -857,7 +857,7 @@ pres_t if_expr(pos_t poss)
     pres_t res;
     HERR(res) = 0;
 
-    size_t case_s = IF_CASE_S, case_n = 0;
+    unsigned long long case_s = IF_CASE_S, case_n = 0;
     struct __case *cases;
     alloc(cases, struct __case, case_s);
 
@@ -961,7 +961,7 @@ pres_t switch_expr(pos_t poss)
     pres_t res;
     HERR(res) = 0;
 
-    size_t case_s = SWITCH_CASE_S, case_n = 0;
+    unsigned long long case_s = SWITCH_CASE_S, case_n = 0;
     struct __case *cases;
     alloc(cases, struct __case, case_s);
 

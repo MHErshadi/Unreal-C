@@ -6,11 +6,11 @@
 
 typedef struct
 {
-    size_t elems_n;
+    unsigned long long elems_n;
     val_t *elems;
 } tuple_t;
 
-tuple_t *tuple_set(size_t elems_n, val_t *elems);
+tuple_t *tuple_set(unsigned long long elems_n, val_t *elems);
 
 tuple_t *tuple_cpy(const tuple_t *val);
 

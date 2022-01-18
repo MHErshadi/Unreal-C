@@ -200,7 +200,7 @@ vres_t visit_list(list_nd *node, pos_t poss, pos_t pose, struct __ctx *ctx, int 
     val_t *elems;
     alloc(elems, val_t, node->elems_n);
 
-    size_t i;
+    unsigned long long i;
     for (i = 0; i < node->elems_n; i++)
     {
         val_t elem = reg_visit_res(&res, visit(node->elems_nd[i], ctx, shf));
@@ -235,7 +235,7 @@ vres_t visit_tuple(tuple_nd *node, pos_t poss, pos_t pose, struct __ctx *ctx, in
     val_t *elems;
     alloc(elems, val_t, node->elems_n);
 
-    size_t i;
+    unsigned long long i;
     for (i = 0; i < node->elems_n; i++)
     {
         val_t elem = reg_visit_res(&res, visit(node->elems_nd[i], ctx, shf));
@@ -270,7 +270,7 @@ vres_t visit_dict(dict_nd *node, pos_t poss, pos_t pose, struct __ctx *ctx, int 
     kval_t *kvals;
     alloc(kvals, kval_t, node->kvs_n);
 
-    size_t i, kvals_s = 0;
+    unsigned long long i, kvals_s = 0;
     for (i = 0; i < node->kvs_n; i++)
     {
         val_t key = reg_visit_res(&res, visit(node->kvs_nd[i].key_nd, ctx, shf));
@@ -321,7 +321,7 @@ vres_t visit_set(set_nd *node, pos_t poss, pos_t pose, struct __ctx *ctx, int sh
     val_t *elems;
     alloc(elems, val_t, node->elems_n);
 
-    size_t i, elems_s = 0;
+    unsigned long long i, elems_s = 0;
     for (i = 0; i < node->elems_n; i++)
     {
         val_t elem = reg_visit_res(&res, visit(node->elems_nd[i], ctx, shf));
@@ -778,7 +778,7 @@ vres_t visit_if(if_nd *node, pos_t poss, pos_t pose, struct __ctx *ctx, int shf)
     vres_t res;
     HERR(res) = 0;
 
-    size_t i;
+    unsigned long long i;
     for (i = 0; i < node->case_n; i++)
     {
         struct __case curr_case = node->cases[i];
@@ -835,7 +835,7 @@ vres_t visit_switch(switch_nd *node, pos_t poss, pos_t pose, struct __ctx *ctx, 
     if (HERR(res))
         goto ret;
 
-    size_t i;
+    unsigned long long i;
     for (i = 0; i < node->case_n; i++)
     {
         struct __case curr_case = node->cases[i];

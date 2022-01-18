@@ -41,12 +41,12 @@ typedef struct
 
 typedef struct
 {
-    size_t vars_n;
-    size_t vars_s;
+    unsigned long long vars_n;
+    unsigned long long vars_s;
     var_t *vars;
 
-    size_t pars_n;
-    size_t pars_s;
+    unsigned long long pars_n;
+    unsigned long long pars_s;
     var_t *pars;
 } symtable_t;
 
@@ -64,7 +64,7 @@ struct __ctx set_ctx(const char *name, struct __ctx *prn, pos_t prn_pos);
 struct __ctx set_ctx_def(const char *name);
 int getv_ctx(struct __ctx *ctx, var_t *var, int *isp, const char *name);
 
-symtable_t init_sym(size_t vars_s, size_t pars_s);
+symtable_t init_sym(unsigned long long vars_s, unsigned long long pars_s);
 symtable_t set_sym_def(struct __ctx *ctx);
 void free_sym(symtable_t *table);
 

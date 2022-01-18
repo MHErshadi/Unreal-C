@@ -4,7 +4,7 @@
 #include "../../macro.h"
 #include "valm.h"
 
-tuple_t *tuple_set(size_t elems_n, val_t *elems)
+tuple_t *tuple_set(unsigned long long elems_n, val_t *elems)
 {
     tuple_t *val;
     alloc(val, tuple_t, 1);
@@ -20,7 +20,7 @@ tuple_t *tuple_cpy(const tuple_t *val)
     val_t *elems;
     alloc(elems, val_t, val->elems_n);
 
-    size_t i;
+    unsigned long long i;
     for (i = 0; i < val->elems_n; i++)
         elems[i] = cpy_val(ELM(val)[i]);
 
@@ -32,7 +32,7 @@ void tuple_disp(const tuple_t *val)
     printf("(");
 
     disp_val(*ELM(val), '\0');
-    size_t i;
+    unsigned long long i;
     for (i = 1; i < val->elems_n; i++)
     {
         printf(", ");
@@ -60,7 +60,7 @@ bool_t *tuple_nequal(const tuple_t *op1, const tuple_t *op2)
 
 bool_t *tuple_has(const tuple_t *op1, val_t op2)
 {
-    size_t i;
+    unsigned long long i;
     for (i = 0; i < op1->elems_n; i++)
         if (cmp_op(ELM(op1)[i], op2))
             return bool_set(1);
@@ -82,7 +82,7 @@ int tuple_cmp(const tuple_t *op1, const tuple_t *op2)
     if (op1->elems_n != op2->elems_n)
         return 0;
 
-    size_t i;
+    unsigned long long i;
     for (i = 0; i < op1->elems_n; i++)
         if (!cmp_op(ELM(op1)[i], ELM(op2)[i]))
             return 0;

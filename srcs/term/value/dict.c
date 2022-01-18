@@ -4,7 +4,7 @@
 #include "../../macro.h"
 #include "valm.h"
 
-dict_t *dict_set(size_t kvals_n, kval_t *kvals)
+dict_t *dict_set(unsigned long long kvals_n, kval_t *kvals)
 {
     dict_t *dict;
     alloc(dict, dict_t, 1);
@@ -20,7 +20,7 @@ dict_t *dict_cpy(const dict_t *val)
     kval_t *kvals;
     alloc(kvals, kval_t, val->kvals_n);
 
-    size_t i;
+    unsigned long long i;
     for (i = 0; i < val->kvals_n; i++)
         kvals[i] = cpy_kval(KVAL(val)[i]);
 
@@ -39,7 +39,7 @@ void dict_disp(const dict_t *val)
     disp_val(KEY(*KVAL(val)), ':');
     printf(" ");
     disp_val(VAL(*KVAL(val)), '\0');
-    size_t i;
+    unsigned long long i;
     for (i = 1; i < val->kvals_n; i++)
     {
         printf(", ");
@@ -59,12 +59,12 @@ void dict_free(dict_t *val)
 
 dict_t *dict_rem(const dict_t *op1, val_t op2)
 {
-    size_t prod_s = op1->kvals_n;
+    unsigned long long prod_s = op1->kvals_n;
 
     kval_t *prod;
     alloc(prod, kval_t, prod_s);
 
-    size_t i;
+    unsigned long long i;
     for (i = 0; i < op1->kvals_n; i++)
     {
         if (cmp_op(op2, KEY(KVAL(op1)[i])))
@@ -74,7 +74,7 @@ dict_t *dict_rem(const dict_t *op1, val_t op2)
     if (i != prod_s)
     {
         ralloc(prod, kval_t, prod_s--);
-        size_t j = i;
+        unsigned long long j = i;
         for (i++ ; i < op1->kvals_n; i++)
             prod[j] = cpy_kval(KVAL(op1)[i]);
     }
@@ -94,7 +94,7 @@ bool_t *dict_nequal(const dict_t *op1, const dict_t *op2)
 
 bool_t *dict_has(const dict_t *op1, val_t op2)
 {
-    size_t i;
+    unsigned long long i;
     for (i = 0; i < op1->kvals_n; i++)
         if (cmp_op(KEY(KVAL(op1)[i]), op2))
             return bool_set(1);
@@ -104,7 +104,7 @@ bool_t *dict_has(const dict_t *op1, val_t op2)
 
 val_t dict_idx(const dict_t *op1, val_t op2)
 {
-    size_t i;
+    unsigned long long i;
     for (i = 0; i < op1->kvals_n; i++)
         if (cmp_op(op2, KEY(KVAL(op1)[i])))
             return cpy_val(VAL(KVAL(op1)[i]));
@@ -116,7 +116,7 @@ int dict_cmp(const dict_t *op1, const dict_t *op2)
     if (op1->kvals_n != op2->kvals_n)
         return 0;
 
-    size_t i;
+    unsigned long long i;
     for (i = 0; i < op1->kvals_n; i++)
         if (!kvals_haskv(KVAL(op2), op2->kvals_n, KVAL(op1)[i]))
             return 0;
